@@ -18,11 +18,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         private PolynomialGF2mSmallM _poly;
 
         // the squaring matrix for this polynomial ring (given as the array of its row vectors)
-        private PolynomialGF2mSmallM[] _sqMatrix;
+        protected PolynomialGF2mSmallM[] _sqMatrix;
 
         // the matrix for computing square roots in this polynomial ring (given as the array of its row vectors). 
         // This matrix is computed as the inverse of the squaring matrix.
-        private PolynomialGF2mSmallM[] _sqRootMatrix;
+        protected PolynomialGF2mSmallM[] _sqRootMatrix;
         #endregion
 
         #region Properties

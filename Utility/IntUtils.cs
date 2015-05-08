@@ -11,23 +11,23 @@ namespace VTDev.Libraries.CEXEngine.Utility
     public static class IntUtils
     {
         #region Constants
-        internal const long INFLATED = long.MinValue;
-        internal static double DOUBLE_MAX = double.MaxValue;
-        internal static double NEGATIVE_INFINITY = -1.0 / 0.0;
-        internal static double NaN = 0.0d / 0.0;
-        internal static double POSITIVE_INFINITY = 1.0 / 0.0;
-        internal static long SIGNIF_BIT_MASK = 0x000FFFFFFFFFFFFFL;
-        internal static long SIGN_BIT_MASK = unchecked((Int64)0x8000000000000000L);
+        public const long INFLATED = long.MinValue;
+        public static double DOUBLE_MAX = double.MaxValue;
+        public static double NEGATIVE_INFINITY = -1.0 / 0.0;
+        public static double NaN = 0.0d / 0.0;
+        public static double POSITIVE_INFINITY = 1.0 / 0.0;
+        public static long SIGNIF_BIT_MASK = 0x000FFFFFFFFFFFFFL;
+        public static long SIGN_BIT_MASK = unchecked((Int64)0x8000000000000000L);
         #endregion
 
         #region Enums
-        internal enum CharConsts : int
+        public enum CharConsts : int
         {
             MIN_RADIX = 2,
             MAX_RADIX = 36
         }
 
-        internal enum DoubleConsts : int
+        public enum DoubleConsts : int
         {
             EXP_BIAS = 1023,
             SIZE = 64,
@@ -36,7 +36,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
             SIGNIFICAND_WIDTH = 53
         }
 
-        internal enum FloatConsts : int
+        public enum FloatConsts : int
         {
             EXP_BIAS = 127,
             MAX_EXPONENT = 127,
@@ -47,13 +47,13 @@ namespace VTDev.Libraries.CEXEngine.Utility
             SIZE = 32
         }
 
-        internal enum IntConsts : int
+        public enum IntConsts : int
         {
             MIN_VALUE = unchecked((Int32)0x80000000),
             MAX_VALUE = 0x7fffffff,
             SIZE = 32
         }
-        internal enum LongConsts : long
+        public enum LongConsts : long
         {
             SIZE = 64,
             MIN_VALUE = unchecked((Int64)0x8000000000000000L),
@@ -61,7 +61,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         }
         #endregion
 
-        #region Internal Methods
+        #region public Methods
         /// <summary>
         /// Returns the number of one-bits in the two's complement binary 
         /// representation of the specified int value. 
@@ -71,7 +71,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="X">The value whose bits are to be counted</param>
         /// 
         /// <returns>The number of one-bits in the two's complement binary representation of the specified int value</returns>
-        internal static int BitCount(int X)
+        public static int BitCount(int X)
         {
             X = X - ((int)(uint)(X >> 1) & 0x55555555);
             X = (X & 0x33333333) + ((int)(uint)(X >> 2) & 0x33333333);
@@ -89,7 +89,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="X">Number to test</param>
         /// 
         /// <returns>Returns the number of bits in a number</returns>
-        internal static int BitCount(long X)
+        public static int BitCount(long X)
         {
             // Successively collapse alternating bit groups into a sum.
             X = ((X >> 1) & 0x5555555555555555L) + (X & 0x5555555555555555L);
@@ -108,7 +108,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="A">The array to copy</param>
         /// 
         /// <returns>Returns the array copy</returns>
-        internal static int[] Clone(int[] A)
+        public static int[] Clone(int[] A)
         {
             int[] result = new int[A.Length];
             Array.Copy(A, 0, result, 0, A.Length);
@@ -123,7 +123,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="X">Double to convert</param>
         /// 
         /// <returns>Long value representation</returns>
-        internal static long DoubleToLong(double X)
+        public static long DoubleToLong(double X)
         {
             if (X != X)
                 return 0L;
@@ -142,7 +142,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="X">Float to convert</param>
         /// 
         /// <returns>The integer</returns>
-        internal static int FloatToInt(float X)
+        public static int FloatToInt(float X)
         {
             float[] fa = new float[] { X };
             int[] ia = new int[1];
@@ -158,7 +158,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="X">Number to test</param>
         /// 
         /// <returns>Returns the highest order 1 bit in a number</returns>
-        internal static int HighestOneBit(int X)
+        public static int HighestOneBit(int X)
         {
             X |= URShift(X, 1);
             X |= URShift(X, 2);
@@ -176,7 +176,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="X">Number to test</param>
         /// 
         /// <returns>Returns the highest order 1 bit in a number</returns>
-        internal static long HighestOneBit(long X)
+        public static long HighestOneBit(long X)
         {
             X |= URShift(X, 1);
             X |= URShift(X, 2);
@@ -195,7 +195,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="X">Integer to copy</param>
         /// 
         /// <returns>The integer bytes</returns>
-        internal static byte[] IntToBytes(int X)
+        public static byte[] IntToBytes(int X)
         {
             int[] num = new int[1] { X };
             byte[] data = new byte[4];
@@ -211,7 +211,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="X">Array of integers</param>
         /// 
         /// <returns>The integers bytes</returns>
-        internal static byte[] IntsToBytes(int[] X)
+        public static byte[] IntsToBytes(int[] X)
         {
             byte[] data = new byte[X.Length * 4];
             Buffer.BlockCopy(X, 0, data, 0, X.Length * 4);
@@ -226,7 +226,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="X">Integer to copy</param>
         /// 
         /// <returns>The float</returns>
-        internal static float IntToFloat(int X)
+        public static float IntToFloat(int X)
         {
             int[] ia = new int[] { X };
             float[] fa = new float[1];
@@ -242,7 +242,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="X">Number to test</param>
         /// 
         /// <returns>Returns the number of leading zeros</returns>
-        internal static int NumberOfLeadingZeros(int X)
+        public static int NumberOfLeadingZeros(int X)
         {
             X |= URShift(X, 1);
             X |= URShift(X, 2);
@@ -260,7 +260,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="X">Number to test</param>
         /// 
         /// <returns>Returns the number of leading zeros</returns>
-        internal static int NumberOfLeadingZeros(long X)
+        public static int NumberOfLeadingZeros(long X)
         {
             X |= URShift(X, 1);
             X |= URShift(X, 2);
@@ -279,7 +279,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="X">Number to test</param>
         /// 
         /// <returns>Returns the number of trailing zeros</returns>
-        internal static int NumberOfTrailingZeros(int X)
+        public static int NumberOfTrailingZeros(int X)
         {
             return BitCount((X & -X) - 1);
         }
@@ -291,7 +291,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="X">Number to test</param>
         /// 
         /// <returns>Returns the number of trailing zeros</returns>
-        internal static int NumberOfTrailingZeros(long X)
+        public static int NumberOfTrailingZeros(long X)
         {
             return BitCount((X & -X) - 1);
         }
@@ -303,7 +303,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="S">A String containing the int representation to be parsed</param>
         /// 
         /// <returns>The integer value represented by the argument in decimal</returns>
-        internal static int ParseInt(String S)
+        public static int ParseInt(String S)
         {
             return ParseInt(S, 10);
         }
@@ -316,7 +316,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="Radix">The radix to be used while parsing</param>
         /// 
         /// <returns>The integer represented by the string argument in the specified radix</returns>
-        internal static int ParseInt(String S, int Radix)
+        public static int ParseInt(String S, int Radix)
         {
             if (S == null)
                 throw new FormatException("null");
@@ -438,7 +438,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="X">The value to be reversed</param>
         /// 
         /// <returns>The value obtained by reversing order of the bits in the specified int value</returns>
-        internal static int ReverseInt(int X)
+        public static int ReverseInt(int X)
         {
             X = (int)((uint)(X & 0x55555555) << 1 | (uint)(X >> 1) & 0x55555555);
             X = (int)((uint)(X & 0x33333333) << 2 | (uint)(X >> 2) & 0x33333333);
@@ -457,7 +457,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="X">The value whose signum is to be computed</param>
         /// 
         /// <returns>The signum function of the specified long value</returns>
-        internal static int Signum(long X)
+        public static int Signum(long X)
         {
             return (int)(((uint)X >> 63) | ((uint)-X >> 63));
         }
@@ -468,7 +468,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// 
         /// <param name="X">The integer to convert</param>
         /// <returns>Returns the integer as a string</returns>
-        internal static string ToString(int X)
+        public static string ToString(int X)
         {
             return X.ToString();
         }
@@ -479,7 +479,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// 
         /// <param name="X">The long integer to convert</param>
         /// <returns>Returns the long integer as a string</returns>
-        internal static string ToString(long X)
+        public static string ToString(long X)
         {
             return X.ToString();
         }
@@ -494,7 +494,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <returns>
         /// Returns an <see cref="System.Int32">int</see> representing the shifted number.
         /// </returns>
-        internal static int URShift(int X, int NumBits)
+        public static int URShift(int X, int NumBits)
         {
             if (X >= 0)
                 return X >> NumBits;
@@ -512,7 +512,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <returns>
         /// Returns an <see cref="System.Int64">long integer</see> representing the shifted number.
         /// </returns>
-        internal static long URShift(long X, int NumBits)
+        public static long URShift(long X, int NumBits)
         {
             if (X >= 0)
                 return X >> NumBits;

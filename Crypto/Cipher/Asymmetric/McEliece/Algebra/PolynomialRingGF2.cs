@@ -181,7 +181,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                         q ^= R;
                 }
             }
-
             return result;
         }
 

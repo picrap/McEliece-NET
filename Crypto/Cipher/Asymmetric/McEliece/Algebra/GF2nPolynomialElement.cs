@@ -8,7 +8,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
     /// <summary>
     /// This class implements elements of finite binary fields <c>GF(2^n)</c> using polynomial representation.
     /// <para>For more information on the arithmetic see for example IEEE Standard 1363 or 
-    /// <a href="http://www.certicom.com/research/online.html"> Certicom online-tutorial</a>.</para>
+    /// <a href=http://www.certicom.com/research/online.html> Certicom online-tutorial</a>.</para>
     /// </summary>
     internal sealed class GF2nPolynomialElement : GF2nElement
     {
@@ -832,7 +832,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                     {
                         tc = ((GF2nPolynomialField)mField).Tc;
                     }
-                    catch
+                    catch (Exception NATExc)
                     {
                         throw new Exception("GF2nPolynomialElement.Reduce: the field polynomial is not a trinomial!");
                     }
@@ -853,7 +853,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                     {
                         pc = ((GF2nPolynomialField)mField).Pc;
                     }
-                    catch
+                    catch (Exception NATExc)
                     {
                         throw new Exception("GF2nPolynomialElement.Reduce: the field polynomial is not a pentanomial!");
                     }

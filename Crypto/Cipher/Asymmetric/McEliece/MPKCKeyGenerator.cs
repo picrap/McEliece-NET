@@ -80,9 +80,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
             // matrix for computing square roots in (GF(2^m))^t
             PolynomialGF2mSmallM[] qInv = ring.SquareRootMatrix;
             // generate canonical check matrix
-            GF2Matrix h = GoppaCode.CreateCanonicalCheckMatrix(field, gp);//1.5s
+            GF2Matrix h = GoppaCode.CreateCanonicalCheckMatrix(field, gp);//err here, higher T?
             // compute short systematic form of check matrix
-            GoppaCode.MaMaPe mmp = GoppaCode.ComputeSystematicForm(h, _secRnd);//.5s
+            GoppaCode.MaMaPe mmp = GoppaCode.ComputeSystematicForm(h, _secRnd);
             GF2Matrix shortH = mmp.SecondMatrix;
             Permutation p = mmp.Permutation;
             // compute short systematic form of generator matrix

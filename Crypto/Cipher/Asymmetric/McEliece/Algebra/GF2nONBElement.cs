@@ -356,15 +356,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// </summary>
         /// 
         /// <param name="Addend">The addend</param>
-        public override void AddToThis(IGFElement Addend)
+        public override void AddToThis(IGFElement addend)
         {
-            if (!(Addend is GF2nONBElement))
+            if (!(addend is GF2nONBElement))
                 throw new Exception();
-            if (!mField.Equals(((GF2nONBElement)Addend).mField))
+            if (!mField.Equals(((GF2nONBElement)addend).mField))
                 throw new Exception();
 
             for (int i = 0; i < _mLength; i++)
-                _mPol[i] ^= ((GF2nONBElement)Addend)._mPol[i];
+                _mPol[i] ^= ((GF2nONBElement)addend)._mPol[i];
         }
 
         /// <summary>
@@ -404,17 +404,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <param name="Obj">The object for comprison</param>
         /// 
         /// <returns>Returns <c>true</c> if the two objects are equal, <c>false</c> otherwise</returns>
-        public override bool Equals(Object Obj)
+        public override bool Equals(Object other)
         {
-            if (Obj == null || !(Obj is GF2nONBElement))
+            if (other == null || !(other is GF2nONBElement))
+            {
                 return false;
+            }
 
-            GF2nONBElement otherElem = (GF2nONBElement)Obj;
+            GF2nONBElement otherElem = (GF2nONBElement)other;
 
             for (int i = 0; i < _mLength; i++)
             {
                 if (_mPol[i] != otherElem._mPol[i])
+                {
                     return false;
+                }
             }
 
             return true;
@@ -777,12 +781,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <param name="Index">The index of the bit to test</param>
         /// 
         /// <returns>Returns <c>true</c> if the indexed bit is set</returns>
-        public override bool TestBit(int Index)
+        public override bool TestBit(int index)
         {
-            if (Index < 0 || Index > mDegree)
+            if (index < 0 || index > mDegree)
+            {
                 return false;
-            
-            long test = _mPol[IntUtils.URShift(Index, 6)] & _mBitmask[Index & 0x3f];
+            }
+            long test = _mPol[IntUtils.URShift(index, 6)] & _mBitmask[index & 0x3f];
             return test != 0x0L;
         }
 

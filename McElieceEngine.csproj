@@ -116,10 +116,10 @@
     <Compile Include="Crypto\Digest\Skein1024.cs" />
     <Compile Include="Crypto\Digest\Skein256.cs" />
     <Compile Include="Crypto\Digest\Skein512.cs" />
-    <Compile Include="Crypto\Generator\DGCDRBG.cs" />
+    <Compile Include="Crypto\Generator\DGCDrbg.cs" />
     <Compile Include="Crypto\Generator\HKDF.cs" />
     <Compile Include="Crypto\Generator\IGenerator.cs" />
-    <Compile Include="Crypto\Generator\PBKDF2.cs" />
+    <Compile Include="Crypto\Generator\KDF2Drbg.cs" />
     <Compile Include="Crypto\Generator\PKCS5.cs" />
     <Compile Include="Crypto\Helper\Enums.cs" />
     <Compile Include="Crypto\Helper\KeyParams.cs" />

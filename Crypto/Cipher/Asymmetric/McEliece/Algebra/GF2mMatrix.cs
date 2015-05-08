@@ -15,12 +15,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <summary>
         /// The finite field GF(2^m)
         /// </summary>
-        private GF2mField FieldG;
+        protected GF2mField FieldG;
         /// <summary>
         /// For the matrix representation the array of type int[][] is used, thus every element of the 
         /// array keeps one element of the matrix (element from finite field GF(2^m))
         /// </summary>
-        private int[][] MatrixN;
+        protected int[][] MatrixN;
         #endregion
 
         #region Constructor
@@ -90,7 +90,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// 
         /// <param name="FieldG">A finite field GF(2^m)</param>
         /// <param name="MatrixN">The matrix as int array; only the reference is copied.</param>
-        public GF2mMatrix(GF2mField FieldG, int[][] MatrixN)
+        protected GF2mMatrix(GF2mField FieldG, int[][] MatrixN)
         {
             this.FieldG = FieldG;
             this.MatrixN = MatrixN;
@@ -276,9 +276,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// Not implemented
         /// </summary>
         /// 
-        /// <param name="V">Vector V</param>
+        /// <param name="Vector">Vector V</param>
         /// 
-        /// <returns>throws NotImplementedException</returns>
+        /// <returns>throws NotImplementedException</c></returns>
         public override Vector LeftMultiply(Vector V)
         {
             throw new NotImplementedException();

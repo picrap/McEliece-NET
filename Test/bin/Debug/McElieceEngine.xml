@@ -4130,12 +4130,12 @@
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.IGFElement.Equals(System.Object)">
             <summary>
-            Decides whether the given object <c>Obj</c> is the same as this field
+            Decides whether the given object <c>other</c> is the same as this field
             </summary>
             
             <param name="Obj">The object for comparison</param>
             
-            <returns>Returns <c>(this == Obj)</c></returns>
+            <returns>Returns <c>(this == other)</c></returns>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.IGFElement.GetHashCode">
             <summary>
@@ -4226,16 +4226,6 @@
             <param name="Radix">Specifies the radix of the String representation</param>
             
             <returns>Returns String representation of this element with the specified radix</returns>
-        </member>
-        <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2nElement.mField">
-            <summary>
-            Holds a pointer to this element's corresponding field
-            </summary>
-        </member>
-        <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2nElement.mDegree">
-            <summary>
-            Holds the extension degree <c>n</c> of this element's corresponding field
-            </summary>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2nElement.Add(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.IGFElement)">
             <summary>
@@ -4527,7 +4517,7 @@
             the matrix is multiplied by each m-bit part of the vector.</para>
             </summary>
             
-            <param name="V">A vector</param>
+            <param name="Vector">A vector</param>
             
             <returns>Returns <c>V * this</c></returns>
         </member>
@@ -4536,7 +4526,7 @@
             Compute the product of this matrix and another matrix
             </summary>
             
-            <param name="M">The other matrix</param>
+            <param name="A">The other matrix</param>
             
             <returns>Returns <c>this * M</c></returns>
         </member>
@@ -4554,7 +4544,7 @@
             Compute the product of this matrix and a vector
             </summary>
             
-            <param name="V">A vector</param>
+            <param name="Vector">A vector</param>
             
             <returns>Returns <c>this * V</c> </returns>
         </member>
@@ -4661,15 +4651,7 @@
             
             <returns>Returns <c>true</c> if this is the zero matrix</returns>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2mMatrix.LeftMultiply(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.Vector)">
-            <summary>
-            Not implemented
-            </summary>
-            
-            <param name="V">Vector V</param>
-            
-            <returns>throws NotImplementedException</returns>
-        </member>
+        <!-- Badly formed XML comment ignored for member "M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2mMatrix.LeftMultiply(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.Vector)" -->
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2mMatrix.RightMultiply(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.Matrix)">
             <summary>
             Not implemented
@@ -4873,6 +4855,238 @@
         <member name="P:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCSign.MaxPlainText">
             <summary>
             Get: The maximum number of bytes the cipher can decrypt
+            </summary>
+        </member>
+        <member name="T:VTDev.Libraries.CEXEngine.Crypto.Generator.KDF2Drbg">
+            <summary>
+            <h3>PBKDF2: An implementation of an Hash based Key Derivation Function.</h3>
+            <para>PBKDF2 as outlined in ISO 18033-2 <cite>ISO 18033</cite>.</para>
+            </summary> 
+            
+            <example>
+            <description>Example using an <c>IGenerator</c> interface:</description>
+            <code>
+            using (IGenerator rnd = new PBKDF2(new SHA512()))
+            {
+                // initialize
+                rnd.Initialize(Salt, Ikm, [Nonce]);
+                // generate bytes
+                rnd.Generate(Output, [Offset], [Size]);
+            }
+            </code>
+            </example>
+            
+            <revisionHistory>
+                <revision date="2015/28/15" version="1.3.1.1">Initial release</revision>
+            </revisionHistory>
+            
+            <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Mac.HMAC">VTDev.Libraries.CEXEngine.Crypto.Mac.HMAC HMAC</seealso>
+            <seealso cref="N:VTDev.Libraries.CEXEngine.Crypto.Digest">VTDev.Libraries.CEXEngine.Crypto.Digest Namespace</seealso>
+            <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
+            <seealso cref="N:VTDev.Libraries.CEXEngine.Crypto">VTDev.Libraries.CEXEngine.Crypto Enumeration</seealso>
+            
+            <remarks>
+            <description><h4>Implementation Notes:</h4></description>
+            <list type="bullet">
+            <item><description>Can be initialized with a <see cref="T:VTDev.Libraries.CEXEngine.Crypto.Digests">Digest</see> or a Mac.</description></item>
+            <item><description>The <see cref="M:VTDev.Libraries.CEXEngine.Crypto.Generator.HKDF.#ctor(VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest,System.Boolean)">Constructors</see> DisposeEngine parameter determines if Digest engine is destroyed when <see cref="M:VTDev.Libraries.CEXEngine.Crypto.Generator.KDF2Drbg.Dispose"/> is called on this class; default is <c>true</c>.</description></item>
+            <item><description>Salt size should be multiple of Digest block size.</description></item>
+            <item><description>Ikm size should be Digest hash return size.</description></item>
+            <item><description>Nonce and Ikm are optional, (but recommended).</description></item>
+            </list>
+            
+            <description><h4>Guiding Publications:</h4></description>
+            <list type="bullet">
+            <item><description>ISO-18033-2: <see href="http://www.shoup.net/iso/std6.pdf">Specification</see>.</description></item>
+            <item><description>RFC 2898: <see href="http://tools.ietf.org/html/rfc2898">Specification</see>.</description></item>
+            </list>
+            
+            <description><h4>Code Base Guides:</h4></description>
+            <list type="table">
+            <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
+            </list> 
+            </remarks>
+        </member>
+        <member name="T:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator">
+            <summary>
+            Random Generator Interface
+            </summary>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator.Initialize(System.Byte[])">
+            <summary>
+            Initialize the generator
+            </summary>
+            
+            <param name="Salt">Salt value</param>
+            
+            <exception cref="T:System.ArgumentNullException">Thrown if a null Salt is used</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">Salt does not contain enough material for Key and Vector creation</exception>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator.Initialize(System.Byte[],System.Byte[])">
+            <summary>
+            Initialize the generator
+            </summary>
+            
+            <param name="Salt">Salt value</param>
+            <param name="Ikm">Key material</param>
+            
+            <exception cref="T:System.ArgumentNullException">Thrown if a null Salt or Ikm is used</exception>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator.Initialize(System.Byte[],System.Byte[],System.Byte[])">
+            <summary>
+            Initialize the generator
+            </summary>
+            
+            <param name="Salt">Salt value</param>
+            <param name="Ikm">Key material</param>
+            <param name="Nonce">Nonce value</param>
+            
+            <exception cref="T:System.ArgumentNullException">Thrown if a null Salt is used</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">Salt does not contain enough material for Key and Vector creation</exception>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator.Generate(System.Byte[])">
+            <summary>
+            Generate a block of cryptographically secure pseudo random bytes
+            </summary>
+            
+            <param name="Output">Output array filled with random bytes</param>
+            
+            <returns>Number of bytes generated</returns>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator.Generate(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Generate cryptographically secure pseudo random bytes
+            </summary>
+            
+            <param name="Output">Output array filled with random bytes</param>
+            <param name="OutOffset">Position within Output array</param>
+            <param name="Size">Number of bytes to generate</param>
+            
+            <returns>Number of bytes generated</returns>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator.Update(System.Byte[])">
+            <summary>
+            Update the Seed material
+            </summary>
+            
+            <param name="Seed">Pseudo random seed material</param>
+            
+            <exception cref="T:System.ArgumentNullException">Thrown if a null Seed is used</exception>
+        </member>
+        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator.IsInitialized">
+            <summary>
+            Get: Generator is ready to produce data
+            </summary>
+        </member>
+        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator.KeySize">
+            <summary>
+            <para>Minimum initialization key size in bytes; 
+            combined sizes of Salt, Ikm, and Nonce must be at least this size.</para>
+            </summary>
+        </member>
+        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator.Name">
+            <summary>
+            Algorithm name
+            </summary>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.KDF2Drbg.#ctor">
+            <summary>
+            Creates a PBKDF2 Bytes Generator based on the given HMAC function
+            </summary>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.KDF2Drbg.#ctor(VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest,System.Boolean)">
+            <summary>
+            Creates a PBKDF2 Bytes Generator based on the given hash function
+            </summary>
+            
+            <param name="Digest">The digest used</param>
+            <param name="DisposeEngine">Dispose of digest engine when <see cref="M:VTDev.Libraries.CEXEngine.Crypto.Generator.KDF2Drbg.Dispose"/> on this class is called</param>
+            
+            <exception cref="T:System.ArgumentNullException">Thrown if a null Digest is used</exception>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.KDF2Drbg.Finalize">
+            <summary>
+            Finalize objects
+            </summary>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.KDF2Drbg.Initialize(System.Byte[])">
+            <summary>
+            Initialize the generator
+            </summary>
+            
+            <param name="Salt">Salt value</param>
+            
+            <exception cref="T:System.ArgumentNullException">Thrown if a null Salt is used</exception>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.KDF2Drbg.Initialize(System.Byte[],System.Byte[])">
+            <summary>
+            Initialize the generator
+            </summary>
+            
+            <param name="Salt">Salt value</param>
+            <param name="Ikm">Key material</param>
+            
+            <exception cref="T:System.ArgumentNullException">Thrown if a null Salt or Ikm is used</exception>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.KDF2Drbg.Initialize(System.Byte[],System.Byte[],System.Byte[])">
+            <summary>
+            Initialize the generator
+            </summary>
+            
+            <param name="Salt">Salt value</param>
+            <param name="Ikm">Key material</param>
+            <param name="Nonce">Nonce value</param>
+            
+            <exception cref="T:System.ArgumentNullException">Thrown if a null Salt or Ikm is used</exception>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.KDF2Drbg.Generate(System.Byte[])">
+            <summary>
+            Generate a block of cryptographically secure pseudo random bytes
+            </summary>
+            
+            <param name="Output">Output array filled with random bytes</param>
+            
+            <returns>Number of bytes generated</returns>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.KDF2Drbg.Generate(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Generate cryptographically secure pseudo random bytes
+            </summary>
+            
+            <param name="Output">Output array filled with random bytes</param>
+            <param name="OutOffset">Position within Output array</param>
+            <param name="Size">Number of bytes to generate</param>
+            
+            <returns>Number of bytes generated</returns>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.KDF2Drbg.Update(System.Byte[])">
+            <summary>
+            Update the Seed material
+            </summary>
+            
+            <param name="Seed">Pseudo random seed material</param>
+            
+            <exception cref="T:System.ArgumentNullException">Thrown if a null Seed is used</exception>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.KDF2Drbg.Dispose">
+            <summary>
+            Dispose of this class, and dependant resources
+            </summary>
+        </member>
+        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Generator.KDF2Drbg.IsInitialized">
+            <summary>
+            Get: Generator is ready to produce data
+            </summary>
+        </member>
+        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Generator.KDF2Drbg.KeySize">
+            <summary>
+            <para>Minimum initialization key size in bytes; 
+            combined sizes of Salt, Ikm, and Nonce must be at least this size.</para>
+            </summary>
+        </member>
+        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Generator.KDF2Drbg.Name">
+            <summary>
+            Get: Cipher name
             </summary>
         </member>
         <member name="T:VTDev.Libraries.CEXEngine.Crypto.Digest.Keccak1024">
@@ -5252,7 +5466,7 @@
             <param name="Oid">The 32 byte identifier</param>
             <param name="T">The error correction capability of the code</param>
             <param name="N">The length of the code</param>
-            <param name="EncG">The encoded generator matrix</param>
+            <param name="G">The encoded generator matrix</param>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCPublicKey.Finalize">
             <summary>
@@ -5395,11 +5609,11 @@
             <param name="Oid">OID of the algorithm</param>
             <param name="N">Length of the code</param>
             <param name="K">The dimension of the code</param>
-            <param name="EncGf">Encoded field polynomial defining the finite field <c>GF(2^m)</c></param>
-            <param name="EncGp">Encoded irreducible Goppa polynomial</param>
-            <param name="EncP">The encoded permutation</param>
-            <param name="EncH">Encoded canonical check matrix</param>
-            <param name="EncQInv">The encoded matrix used to compute square roots in <c>(GF(2^m))^t</c></param>
+            <param name="Gf">Encoded field polynomial defining the finite field <c>GF(2^m)</c></param>
+            <param name="Gp">Encoded irreducible Goppa polynomial</param>
+            <param name="P">The encoded permutation</param>
+            <param name="H">Encoded canonical check matrix</param>
+            <param name="QInv">The encoded matrix used to compute square roots in <c>(GF(2^m))^t</c></param>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCPrivateKey.Finalize">
             <summary>
@@ -8315,88 +8529,6 @@
             </list> 
             </remarks>
         </member>
-        <member name="T:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator">
-            <summary>
-            Random Generator Interface
-            </summary>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator.Initialize(System.Byte[])">
-            <summary>
-            Initialize the generator
-            </summary>
-            
-            <param name="Salt">Salt value</param>
-            
-            <exception cref="T:System.ArgumentNullException">Thrown if a null Salt is used</exception>
-            <exception cref="T:System.ArgumentOutOfRangeException">Salt does not contain enough material for Key and Vector creation</exception>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator.Initialize(System.Byte[],System.Byte[])">
-            <summary>
-            Initialize the generator
-            </summary>
-            
-            <param name="Salt">Salt value</param>
-            <param name="Ikm">Key material</param>
-            
-            <exception cref="T:System.ArgumentNullException">Thrown if a null Salt or Ikm is used</exception>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator.Initialize(System.Byte[],System.Byte[],System.Byte[])">
-            <summary>
-            Initialize the generator
-            </summary>
-            
-            <param name="Salt">Salt value</param>
-            <param name="Ikm">Key material</param>
-            <param name="Nonce">Nonce value</param>
-            
-            <exception cref="T:System.ArgumentNullException">Thrown if a null Salt is used</exception>
-            <exception cref="T:System.ArgumentOutOfRangeException">Salt does not contain enough material for Key and Vector creation</exception>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator.Generate(System.Byte[])">
-            <summary>
-            Generate a block of cryptographically secure pseudo random bytes
-            </summary>
-            
-            <param name="Output">Output array filled with random bytes</param>
-            
-            <returns>Number of bytes generated</returns>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator.Generate(System.Byte[],System.Int32,System.Int32)">
-            <summary>
-            Generate cryptographically secure pseudo random bytes
-            </summary>
-            
-            <param name="Output">Output array filled with random bytes</param>
-            <param name="OutOffset">Position within Output array</param>
-            <param name="Size">Number of bytes to generate</param>
-            
-            <returns>Number of bytes generated</returns>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator.Update(System.Byte[])">
-            <summary>
-            Update the Seed material
-            </summary>
-            
-            <param name="Seed">Pseudo random seed material</param>
-            
-            <exception cref="T:System.ArgumentNullException">Thrown if a null Seed is used</exception>
-        </member>
-        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator.IsInitialized">
-            <summary>
-            Get: Generator is ready to produce data
-            </summary>
-        </member>
-        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator.KeySize">
-            <summary>
-            <para>Minimum initialization key size in bytes; 
-            combined sizes of Salt, Ikm, and Nonce must be at least this size.</para>
-            </summary>
-        </member>
-        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Generator.IGenerator.Name">
-            <summary>
-            Algorithm name
-            </summary>
-        </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.HKDF.#ctor(VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest,System.Boolean)">
             <summary>
             Creates a HKDF Bytes Generator based on the given hash function
@@ -9483,156 +9615,6 @@
             Get: Returns the degree of the middle coefficient of the used field trinomial (x^n + x^(getTc()) + 1)
             </summary>
         </member>
-        <member name="T:VTDev.Libraries.CEXEngine.Crypto.Generator.PBKDF2">
-            <summary>
-            <h3>PBKDF2: An implementation of an Hash based Key Derivation Function.</h3>
-            <para>PBKDF2 as outlined in ISO 18033-2 <cite>ISO 18033</cite>.</para>
-            </summary> 
-            
-            <example>
-            <description>Example using an <c>IGenerator</c> interface:</description>
-            <code>
-            using (IGenerator rnd = new PBKDF2(new SHA512()))
-            {
-                // initialize
-                rnd.Initialize(Salt, Ikm, [Nonce]);
-                // generate bytes
-                rnd.Generate(Output, [Offset], [Size]);
-            }
-            </code>
-            </example>
-            
-            <revisionHistory>
-                <revision date="2015/28/15" version="1.3.1.1">Initial release</revision>
-            </revisionHistory>
-            
-            <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Mac.HMAC">VTDev.Libraries.CEXEngine.Crypto.Mac.HMAC HMAC</seealso>
-            <seealso cref="N:VTDev.Libraries.CEXEngine.Crypto.Digest">VTDev.Libraries.CEXEngine.Crypto.Digest Namespace</seealso>
-            <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-            <seealso cref="N:VTDev.Libraries.CEXEngine.Crypto">VTDev.Libraries.CEXEngine.Crypto Enumeration</seealso>
-            
-            <remarks>
-            <description><h4>Implementation Notes:</h4></description>
-            <list type="bullet">
-            <item><description>Can be initialized with a <see cref="T:VTDev.Libraries.CEXEngine.Crypto.Digests">Digest</see> or a Mac.</description></item>
-            <item><description>The <see cref="M:VTDev.Libraries.CEXEngine.Crypto.Generator.HKDF.#ctor(VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest,System.Boolean)">Constructors</see> DisposeEngine parameter determines if Digest engine is destroyed when <see cref="M:VTDev.Libraries.CEXEngine.Crypto.Generator.PBKDF2.Dispose"/> is called on this class; default is <c>true</c>.</description></item>
-            <item><description>Salt size should be multiple of Digest block size.</description></item>
-            <item><description>Ikm size should be Digest hash return size.</description></item>
-            <item><description>Nonce and Ikm are optional, (but recommended).</description></item>
-            </list>
-            
-            <description><h4>Guiding Publications:</h4></description>
-            <list type="bullet">
-            <item><description>ISO-18033-2: <see href="http://www.shoup.net/iso/std6.pdf">Specification</see>.</description></item>
-            <item><description>RFC 2898: <see href="http://tools.ietf.org/html/rfc2898">Specification</see>.</description></item>
-            </list>
-            
-            <description><h4>Code Base Guides:</h4></description>
-            <list type="table">
-            <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
-            </list> 
-            </remarks>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.PBKDF2.#ctor">
-            <summary>
-            Creates a PBKDF2 Bytes Generator based on the given HMAC function
-            </summary>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.PBKDF2.#ctor(VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest,System.Boolean)">
-            <summary>
-            Creates a PBKDF2 Bytes Generator based on the given hash function
-            </summary>
-            
-            <param name="Digest">The digest used</param>
-            <param name="DisposeEngine">Dispose of digest engine when <see cref="M:VTDev.Libraries.CEXEngine.Crypto.Generator.PBKDF2.Dispose"/> on this class is called</param>
-            
-            <exception cref="T:System.ArgumentNullException">Thrown if a null Digest is used</exception>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.PBKDF2.Finalize">
-            <summary>
-            Finalize objects
-            </summary>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.PBKDF2.Initialize(System.Byte[])">
-            <summary>
-            Initialize the generator
-            </summary>
-            
-            <param name="Salt">Salt value</param>
-            
-            <exception cref="T:System.ArgumentNullException">Thrown if a null Salt is used</exception>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.PBKDF2.Initialize(System.Byte[],System.Byte[])">
-            <summary>
-            Initialize the generator
-            </summary>
-            
-            <param name="Salt">Salt value</param>
-            <param name="Ikm">Key material</param>
-            
-            <exception cref="T:System.ArgumentNullException">Thrown if a null Salt or Ikm is used</exception>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.PBKDF2.Initialize(System.Byte[],System.Byte[],System.Byte[])">
-            <summary>
-            Initialize the generator
-            </summary>
-            
-            <param name="Salt">Salt value</param>
-            <param name="Ikm">Key material</param>
-            <param name="Nonce">Nonce value</param>
-            
-            <exception cref="T:System.ArgumentNullException">Thrown if a null Salt or Ikm is used</exception>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.PBKDF2.Generate(System.Byte[])">
-            <summary>
-            Generate a block of cryptographically secure pseudo random bytes
-            </summary>
-            
-            <param name="Output">Output array filled with random bytes</param>
-            
-            <returns>Number of bytes generated</returns>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.PBKDF2.Generate(System.Byte[],System.Int32,System.Int32)">
-            <summary>
-            Generate cryptographically secure pseudo random bytes
-            </summary>
-            
-            <param name="Output">Output array filled with random bytes</param>
-            <param name="OutOffset">Position within Output array</param>
-            <param name="Size">Number of bytes to generate</param>
-            
-            <returns>Number of bytes generated</returns>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.PBKDF2.Update(System.Byte[])">
-            <summary>
-            Update the Seed material
-            </summary>
-            
-            <param name="Seed">Pseudo random seed material</param>
-            
-            <exception cref="T:System.ArgumentNullException">Thrown if a null Seed is used</exception>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.PBKDF2.Dispose">
-            <summary>
-            Dispose of this class, and dependant resources
-            </summary>
-        </member>
-        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Generator.PBKDF2.IsInitialized">
-            <summary>
-            Get: Generator is ready to produce data
-            </summary>
-        </member>
-        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Generator.PBKDF2.KeySize">
-            <summary>
-            <para>Minimum initialization key size in bytes; 
-            combined sizes of Salt, Ikm, and Nonce must be at least this size.</para>
-            </summary>
-        </member>
-        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Generator.PBKDF2.Name">
-            <summary>
-            Get: Cipher name
-            </summary>
-        </member>
         <member name="T:VTDev.Libraries.CEXEngine.Crypto.Digest.Skein512">
             <summary>
             <h3>Skein512: An implementation of the Skein digest with a 512 bit digest return size.</h3>
@@ -10356,7 +10338,7 @@
             
             <returns>Returns the remainder</returns>
         </member>
-        <member name="T:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDRBG">
+        <member name="T:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDrbg">
             <summary>
             <h3>DGTDRBG: An implementation of a Digest Counter based Deterministic Random Byte Generator.</h3>
             <para>A Digest Counter DRBG as outlined in NIST document: SP800-90A<cite>SP800-90A</cite></para>
@@ -10388,7 +10370,7 @@
             <list type="bullet">
             <item><description>Can be initialized with any <see cref="T:VTDev.Libraries.CEXEngine.Crypto.Digests">digest</see>.</description></item>
             <item><description>Combination of [Salt, Ikm, Nonce] must be at least: digest block size + counter (8 bytes) size in length.</description></item>
-            <item><description>The <see cref="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDRBG.#ctor(VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest,System.Boolean)">Constructors</see> DisposeEngine parameter determines if Digest engine is destroyed when <see cref="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDRBG.Dispose"/> is called on this class; default is <c>true</c>.</description></item>
+            <item><description>The <see cref="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDrbg.#ctor(VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest,System.Boolean)">Constructors</see> DisposeEngine parameter determines if Digest engine is destroyed when <see cref="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDrbg.Dispose"/> is called on this class; default is <c>true</c>.</description></item>
             <item><description>Nonce and Ikm are optional, (but recommended).</description></item>
             </list>
             
@@ -10407,20 +10389,20 @@
             </list> 
             </remarks>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDRBG.#ctor(VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest,System.Boolean)">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDrbg.#ctor(VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest,System.Boolean)">
             <summary>
             Initialize the class
             </summary>
             
             <param name="Digest">Hash function</param>
-            <param name="DisposeEngine">Dispose of digest engine when <see cref="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDRBG.Dispose"/> on this class is called</param>
+            <param name="DisposeEngine">Dispose of digest engine when <see cref="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDrbg.Dispose"/> on this class is called</param>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDRBG.Finalize">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDrbg.Finalize">
             <summary>
             Finalize objects
             </summary>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDRBG.Initialize(System.Byte[])">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDrbg.Initialize(System.Byte[])">
             <summary>
             Initialize the generator
             </summary>
@@ -10430,7 +10412,7 @@
             <exception cref="T:System.ArgumentNullException">Thrown if a null salt is used</exception>
             <exception cref="T:System.ArgumentOutOfRangeException">Salt does not contain enough material for Key and Vector creation</exception>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDRBG.Initialize(System.Byte[],System.Byte[])">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDrbg.Initialize(System.Byte[],System.Byte[])">
             <summary>
             Initialize the generator
             </summary>
@@ -10440,7 +10422,7 @@
             
             <exception cref="T:System.ArgumentNullException">Thrown if a null salt or ikm is used</exception>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDRBG.Initialize(System.Byte[],System.Byte[],System.Byte[])">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDrbg.Initialize(System.Byte[],System.Byte[],System.Byte[])">
             <summary>
             Initialize the generator
             </summary>
@@ -10451,7 +10433,7 @@
             
             <exception cref="T:System.ArgumentNullException">Thrown if a null salt or ikm is used</exception>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDRBG.Generate(System.Byte[])">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDrbg.Generate(System.Byte[])">
             <summary>
             Generate a block of cryptographically secure pseudo random bytes
             </summary>
@@ -10460,7 +10442,7 @@
             
             <returns>Number of bytes generated</returns>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDRBG.Generate(System.Byte[],System.Int32,System.Int32)">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDrbg.Generate(System.Byte[],System.Int32,System.Int32)">
             <summary>
             Generate cryptographically secure pseudo random bytes
             </summary>
@@ -10471,7 +10453,7 @@
             
             <returns>Number of bytes generated</returns>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDRBG.Update(System.Byte[])">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDrbg.Update(System.Byte[])">
             <summary>
             <para>Update the Seed material. Three state Seed paramater: 
             If Seed size is equal to digest blocksize plus counter size, both are updated. 
@@ -10484,7 +10466,7 @@
             <exception cref="T:System.ArgumentNullException">Thrown if a null Seed is used</exception>
             <exception cref="T:System.ArgumentOutOfRangeException">Seed does not contain enough material for Key and Vector creation</exception>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDRBG.BlockUpdate(System.Byte[])">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDrbg.BlockUpdate(System.Byte[])">
             <remarks>
             Docs say class 'should be parallelizable'. 
             Only problem is, digest consumes most of the processing time,
@@ -10492,23 +10474,23 @@
             saved in small sized runs..
             </remarks>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDRBG.Dispose">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDrbg.Dispose">
             <summary>
             Dispose of this class, and dependant resources
             </summary>
         </member>
-        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDRBG.IsInitialized">
+        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDrbg.IsInitialized">
             <summary>
             Get: Generator is ready to produce data
             </summary>
         </member>
-        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDRBG.KeySize">
+        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDrbg.KeySize">
             <summary>
             <para>Minimum initialization key size in bytes; 
             combined sizes of Salt, Ikm, and Nonce must be at least this size.</para>
             </summary>
         </member>
-        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDRBG.Name">
+        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Generator.DGCDrbg.Name">
             <summary>
             Algorithm name
             </summary>
@@ -11811,8 +11793,7 @@
             <summary>
             Returns the hash code of this permutation
             </summary>
-            
-            <returns>The hash code</returns>
+            <returns></returns>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.Permutation.ToString">
             <summary>
@@ -11821,13 +11802,7 @@
             
             <returns>Returns the permutation in readable form</returns>
         </member>
-        <member name="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2nPolynomialElement">
-            <summary>
-            This class implements elements of finite binary fields <c>GF(2^n)</c> using polynomial representation.
-            <para>For more information on the arithmetic see for example IEEE Standard 1363 or 
-            <a href="http://www.certicom.com/research/online.html"> Certicom online-tutorial</a>.</para>
-            </summary>
-        </member>
+        <!-- Badly formed XML comment ignored for member "T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2nPolynomialElement" -->
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2nPolynomialElement.#ctor(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2nPolynomialField,System.Random)">
             <summary>
             Create a new random GF2nPolynomialElement using the given field and source of randomness
@@ -13666,8 +13641,7 @@
             <summary>
             Get: Return whether this is the zero vector (i.e., all elements are zero)
             </summary>
-            
-            <returns>Returns <c>true</c> if this is the zero</returns>
+            <returns></returns>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2Vector.Multiply(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.Permutation)">
             <summary>
@@ -14194,7 +14168,7 @@
             <para>The finite field is also obtained from the GF2mVector</para>
             </summary>
             
-            <param name="V">The vector</param>
+            <param name="Vect"></param>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.Add(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM)">
             <summary>
@@ -14549,13 +14523,6 @@
             <param name="A">The polynomial</param>
             
             <returns>The reduced polynomial</returns>
-        </member>
-        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.Coefficients">
-            <summary>
-            For the polynomial representation the map f: R->Z*, poly(X) -> [coef_0, coef_1, ...] is used, where
-            coef_i is the i th coefficient of the polynomial represented as int GF2mField). 
-            The polynomials are stored as int arrays.
-            </summary>
         </member>
         <member name="P:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.Degree">
             <summary>

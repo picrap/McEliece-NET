@@ -70,7 +70,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// <list type="bullet">
     /// <item><description>Can be initialized with any <see cref="Digests">digest</see>.</description></item>
     /// <item><description>Combination of [Salt, Ikm, Nonce] must be at least: digest block size + counter (8 bytes) size in length.</description></item>
-    /// <item><description>The <see cref="DGCDRBG(IDigest, bool)">Constructors</see> DisposeEngine parameter determines if Digest engine is destroyed when <see cref="Dispose()"/> is called on this class; default is <c>true</c>.</description></item>
+    /// <item><description>The <see cref="DGCDrbg(IDigest, bool)">Constructors</see> DisposeEngine parameter determines if Digest engine is destroyed when <see cref="Dispose()"/> is called on this class; default is <c>true</c>.</description></item>
     /// <item><description>Nonce and Ikm are optional, (but recommended).</description></item>
     /// </list>
     /// 
@@ -88,7 +88,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class DGCDRBG : IGenerator, IDisposable
+    public sealed class DGCDrbg : IGenerator, IDisposable
     {
         #region Constants
         private const string ALG_NAME = "DGCDRBG";
@@ -144,7 +144,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// 
         /// <param name="Digest">Hash function</param>
         /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
-        public DGCDRBG(IDigest Digest, bool DisposeEngine = true)
+        public DGCDrbg(IDigest Digest, bool DisposeEngine = true)
         {
             _disposeEngine = DisposeEngine;
             _msgDigest = Digest;
@@ -156,7 +156,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// <summary>
         /// Finalize objects
         /// </summary>
-        ~DGCDRBG()
+        ~DGCDrbg()
         {
             Dispose(false);
         }

@@ -13,7 +13,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
     /// This class implements the abstract class <c>Vector</c> for the case of vectors over the finite field GF(2). 
     /// <para>For the vector representation the array of type int[] is used, thus one element of the array holds 32 elements of the vector.</para>
     /// </summary>
-    public sealed class GF2Vector : Vector
+    internal sealed class GF2Vector : Vector
     {
         #region Fields
         // holds the elements of this vector
@@ -430,8 +430,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <summary>
         /// Get: Return whether this is the zero vector (i.e., all elements are zero)
         /// </summary>
-        /// 
-        /// <returns>Returns <c>true</c> if this is the zero</returns>
+        /// <returns></returns>
         public override bool IsZero()
         {
             for (int i = _elements.Length - 1; i >= 0; i--)

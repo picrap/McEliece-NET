@@ -22,7 +22,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             // i.e., n is a power of 2
             if ((N & -N) == N) 
                 return (int)((N * (long)(IntUtils.URShift(SecRnd.Next(), 1))) >> 31);
- 
+
             int bits = 0; 
             int value = 0;
 

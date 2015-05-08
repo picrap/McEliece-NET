@@ -9,16 +9,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
     /// This abstract class implements an element of the finite field <c>GF(2)^n</c> in either 
     /// <c>optimal normal basis</c> representation (<c>ONB</c>) or in <c>polynomial</c> representation.
     /// </summary>
-    public abstract class GF2nElement : IGFElement
+    internal abstract class GF2nElement : IGFElement
     {
         #region Fields
-        /// <summary>
-        /// Holds a pointer to this element's corresponding field
-        /// </summary>
+        // holds a pointer to this element's corresponding field.
         protected GF2nField mField;
-        /// <summary>
-        /// Holds the extension degree <c>n</c> of this element's corresponding field
-        /// </summary>
+        // holds the extension degree <c>n</c> of this element's corresponding field.
         protected int mDegree;
         #endregion
 

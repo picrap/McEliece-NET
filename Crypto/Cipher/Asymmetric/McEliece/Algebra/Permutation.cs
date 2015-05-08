@@ -12,7 +12,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
     /// This class implements permutations of the set {0,1,...,n-1} for some given n &gt; 0.
     /// <para>i.e., ordered sequences containing each number <c>m</c> (<c>0 &lt;= m &lt; n</c>) once and only once.</para>
     /// </summary>
-    public sealed class Permutation
+    internal sealed class Permutation
     {
         #region Fields
         private int[] _perm;
@@ -194,8 +194,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <summary>
         /// Returns the hash code of this permutation
         /// </summary>
-        /// 
-        /// <returns>The hash code</returns>
+        /// <returns></returns>
         public override int GetHashCode()
         {
             return _perm.GetHashCode();

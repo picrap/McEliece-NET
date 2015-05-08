@@ -20,7 +20,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
     /// where integers have the binary representation. For example: A^7+A^3+A+1 -&gt;
     /// (00...0010001011)=139 Also for elements type Integer is used.</para>
     /// </remarks>
-    public sealed class GF2mField
+    internal sealed class GF2mField
     {
         #region Fields
         private int _degree = 0;
@@ -126,7 +126,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// </summary>
         public void Clear()
         {
-            if (_polynomial != 0)
+            if (_polynomial != null)
                 _polynomial = 0;
             _degree = 0;
         }

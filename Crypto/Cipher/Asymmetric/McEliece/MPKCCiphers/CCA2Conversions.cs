@@ -80,7 +80,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
         {
             if ((GVector.Length != N) || (GVector.HammingWeight() != T))
                 throw new ArgumentException("vector has wrong length or hamming weight");
-            
+
             int[] vecArray = GVector.VectorArray;
             BigInteger bc = BigMath.Binomial(N, T);
             BigInteger d = ZERO;

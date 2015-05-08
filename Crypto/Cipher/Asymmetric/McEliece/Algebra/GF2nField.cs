@@ -10,7 +10,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
     /// <para>It holds the extension degree <c>n</c>, the characteristic, the irreducible fieldpolynomial and conversion matrices. 
     /// GF2nField is implemented by the classes GF2nPolynomialField and GF2nONBField.</para>
     /// </summary>
-    public abstract class GF2nField
+    internal abstract class GF2nField
     {
         #region Fields
         /// <summary>

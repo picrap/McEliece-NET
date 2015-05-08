@@ -10,7 +10,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
     /// <summary>
     /// This class describes operations with polynomials from the ring R = GF(2^m)[X], where 2 &lt;= m &lt;=31
     /// </summary>
-    public sealed class PolynomialGF2mSmallM
+    internal sealed class PolynomialGF2mSmallM
     {
         #region Constants
         /// <summary>
@@ -20,23 +20,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         #endregion
 
         #region Fields
+        // the finite field GF(2^m)
         private GF2mField _field;
+        // the degree of this polynomial
         private int _degree;
+        // For the polynomial representation the map f: R->Z*, <c>poly(X) -> [coef_0, coef_1, ...]</c> is used, where
+        // <c>coef_i</c> is the <c>i</c>th coefficient of the polynomial represented as int (see {@link GF2mField}). 
+        // The polynomials are stored as int arrays.
         private int[] _coefficients;
         #endregion
 
         #region Properties
-        /// <summary>
-        /// For the polynomial representation the map f: R->Z*, poly(X) -> [coef_0, coef_1, ...] is used, where
-        /// coef_i is the i th coefficient of the polynomial represented as int GF2mField). 
-        /// The polynomials are stored as int arrays.
-        /// </summary>
-        private int[] Coefficients
-        {
-            get { return _coefficients; }
-            set { _coefficients = value; }
-        }
-
         /// <summary>
         /// Get: Returns the degree of this polynomial
         /// </summary>
@@ -44,13 +38,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         {
             get
             {
-                int d = Coefficients.Length - 1;
-                if (Coefficients[d] == 0)
+                int d = _coefficients.Length - 1;
+                if (_coefficients[d] == 0)
                     return -1;
 
                 return d;
             }
-            private set { _degree = value; }
         }
 
         /// <summary>
@@ -59,7 +52,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         public GF2mField Field
         {
             get { return _field; }
-            private set { _field = value; }
         }
 
         /// <summary>
@@ -69,10 +61,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         {
             get
             {
-                if (Degree == -1)
+                if (_degree == -1)
                     return 0;
 
-                return Coefficients[Degree];
+                return _coefficients[_degree];
             }
         }
         #endregion
@@ -85,9 +77,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <param name="Field">The finite field GF(2^m)</param>
         public PolynomialGF2mSmallM(GF2mField Field)
         {
-            this.Field = Field;
-            this.Degree = -1;
-            Coefficients = new int[1];
+            _field = Field;
+            _degree = -1;
+            _coefficients = new int[1];
         }
 
         /// <summary>
@@ -100,12 +92,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <param name="SecRnd">The SecureRandom instance</param>
         public PolynomialGF2mSmallM(GF2mField Field, int Degree, char PolynomialType, SecureRandom SecRnd)
         {
-            this.Field = Field;
+            _field = Field;
 
             switch (PolynomialType)
             {
                 case PolynomialGF2mSmallM.RANDOM_IRREDUCIBLE_POLYNOMIAL:
-                    Coefficients = CreateRandomIrreduciblePolynomial(Degree, SecRnd);
+                    _coefficients = CreateRandomIrreduciblePolynomial(Degree, SecRnd);
                     break;
                 default:
                     throw new ArgumentException(" Error: type " + PolynomialType + " is not defined for GF2smallmPolynomial");
@@ -122,10 +114,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <param name="Degree">The degree of the monomial</param>
         public PolynomialGF2mSmallM(GF2mField Field, int Degree)
         {
-            this.Field = Field;
-            this.Degree = Degree;
-            Coefficients = new int[Degree + 1];
-            Coefficients[Degree] = 1;
+            _field = Field;
+            _degree = Degree;
+            _coefficients = new int[Degree + 1];
+            _coefficients[Degree] = 1;
         }
 
         /// <summary>
@@ -136,8 +128,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <param name="Coeffs">The coefficient vector</param>
         public PolynomialGF2mSmallM(GF2mField Field, int[] Coeffs)
         {
-            this.Field = Field;
-            Coefficients = NormalForm(Coeffs);
+            _field = Field;
+            _coefficients = NormalForm(Coeffs);
             ComputeDegree();
         }
 
@@ -149,7 +141,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <param name="Encoded">The polynomial in byte array form</param>
         public PolynomialGF2mSmallM(GF2mField Field, byte[] Encoded)
         {
-            this.Field = Field;
+            _field = Field;
             int d = 8;
             int count = 1;
             while (Field.Degree > d)
@@ -161,19 +153,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             if ((Encoded.Length % count) != 0)
                 throw new ArgumentException("PolynomialGF2mSmallM: byte array is not encoded polynomial over given finite field GF2m!");
 
-            Coefficients = new int[Encoded.Length / count];
+            _coefficients = new int[Encoded.Length / count];
             count = 0;
-            for (int i = 0; i < Coefficients.Length; i++)
+            for (int i = 0; i < _coefficients.Length; i++)
             {
                 for (int j = 0; j < d; j += 8)
-                    Coefficients[i] ^= (Encoded[count++] & 0x000000ff) << j;
+                    _coefficients[i] ^= (Encoded[count++] & 0x000000ff) << j;
 
-                if (!this.Field.IsElementOfThisField(Coefficients[i]))
+                if (!this._field.IsElementOfThisField(_coefficients[i]))
                     throw new ArgumentException(" PolynomialGF2mSmallM: byte array is not encoded polynomial over given finite field GF2m!");
             }
 
             // if HC = 0 for non-zero polynomial, returns error
-            if ((Coefficients.Length != 1) && (Coefficients[Coefficients.Length - 1] == 0))
+            if ((_coefficients.Length != 1) && (_coefficients[_coefficients.Length - 1] == 0))
                 throw new ArgumentException("PolynomialGF2mSmallM: byte array is not encoded polynomial over given finite field GF2m");
 
             ComputeDegree();
@@ -187,9 +179,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         public PolynomialGF2mSmallM(PolynomialGF2mSmallM Gf)
         {
             // field needs not to be cloned since it is immutable
-            this.Field = Gf.Field;
-            _degree = Gf.Degree;
-            Coefficients = IntUtils.Clone(Gf.Coefficients);
+            _field = Gf._field;
+            _degree = Gf._degree;
+            _coefficients = IntUtils.Clone(Gf._coefficients);
         }
 
         /// <summary>
@@ -197,9 +189,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <para>The finite field is also obtained from the GF2mVector</para>
         /// </summary>
         /// 
-        /// <param name="V">The vector</param>
-        public PolynomialGF2mSmallM(GF2mVector V) :
-            this(V.Field, V.IntArrayForm)
+        /// <param name="Vect"></param>
+        public PolynomialGF2mSmallM(GF2mVector Vect) :
+            this(Vect.Field, Vect.IntArrayForm)
         {
         }
         #endregion
@@ -214,10 +206,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <returns>Return <c>this + a</c> (newly created)</returns>
         public PolynomialGF2mSmallM Add(PolynomialGF2mSmallM Addend)
         {
-            int[] resultCoeff = Add(Coefficients, Addend.Coefficients);
-            return new PolynomialGF2mSmallM(Field, resultCoeff);
+            int[] resultCoeff = Add(_coefficients, Addend._coefficients);
+            return new PolynomialGF2mSmallM(_field, resultCoeff);
         }
-        
+
         /// <summary>
         /// Compute the sum of this polynomial and the monomial of the given degree
         /// </summary>
@@ -229,9 +221,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         {
             int[] monomial = new int[Degree + 1];
             monomial[Degree] = 1;
-            int[] resultCoeff = Add(Coefficients, monomial);
+            int[] resultCoeff = Add(_coefficients, monomial);
 
-            return new PolynomialGF2mSmallM(Field, resultCoeff);
+            return new PolynomialGF2mSmallM(_field, resultCoeff);
         }
 
         /// <summary>
@@ -241,7 +233,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <param name="Addend">The addend</param>
         public void AddToThis(PolynomialGF2mSmallM Addend)
         {
-            Coefficients = Add(Coefficients, Addend.Coefficients);
+            _coefficients = Add(_coefficients, Addend._coefficients);
             ComputeDegree();
         }
 
@@ -250,11 +242,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// </summary>
         public void Clear()
         {
-            if (Coefficients != null)
-                Array.Clear(Coefficients, 0, Coefficients.Length);
-            Degree = 0;
-            if (Field != null)
-                Field.Clear();
+            if (_coefficients != null)
+                Array.Clear(_coefficients, 0, _coefficients.Length);
+            _degree = 0;
+            if (_field != null)
+                _field.Clear();
         }
 
         /// <summary>
@@ -264,10 +256,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <returns>Returns polynomial pair = {q,r} where this = q*f+r and deg(r) &lt; deg(f)</returns>
         public PolynomialGF2mSmallM[] Divide(PolynomialGF2mSmallM F)
         {
-            int[][] resultCoeffs = Divide(Coefficients, F.Coefficients);
+            int[][] resultCoeffs = Divide(_coefficients, F._coefficients);
             return new PolynomialGF2mSmallM[]{
-            new PolynomialGF2mSmallM(Field, resultCoeffs[0]),
-            new PolynomialGF2mSmallM(Field, resultCoeffs[1])};
+            new PolynomialGF2mSmallM(_field, resultCoeffs[0]),
+            new PolynomialGF2mSmallM(_field, resultCoeffs[1])};
         }
 
         /// <summary>
@@ -279,9 +271,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <returns>Returns <c>this(e)</c></returns>
         public int EvaluateAt(int E)
         {
-            int result = Coefficients[Degree];
-            for (int i = Degree - 1; i >= 0; i--)
-                result = Field.Multiply(result, E) ^ Coefficients[i];
+            int result = _coefficients[_degree];
+            for (int i = _degree - 1; i >= 0; i--)
+                result = _field.Multiply(result, E) ^ _coefficients[i];
             
             return result;
         }
@@ -295,8 +287,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <returns>Returns Gcd(this, f)</returns>
         public PolynomialGF2mSmallM Gcd(PolynomialGF2mSmallM F)
         {
-            int[] resultCoeff = Gcd(Coefficients, F.Coefficients);
-            return new PolynomialGF2mSmallM(Field, resultCoeff);
+            int[] resultCoeff = Gcd(_coefficients, F._coefficients);
+            return new PolynomialGF2mSmallM(_field, resultCoeff);
         }
 
         /// <summary>
@@ -322,7 +314,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                 b = new int[c.Length];
                 Array.Copy(c, 0, b, 0, b.Length);
             }
-            int coeff = Field.Inverse(HeadCoefficient(a));
+            int coeff = _field.Inverse(HeadCoefficient(a));
 
             return MultWithElement(a, coeff);
         }
@@ -336,10 +328,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <returns>Returns the coefficient with the given index</returns>
         public int GetCoefficient(int Index)
         {
-            if ((Index < 0) || (Index > Degree))
+            if ((Index < 0) || (Index > _degree))
                 return 0;
             
-            return Coefficients[Index];
+            return _coefficients[Index];
         }
 
         /// <summary>
@@ -351,18 +343,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         {
             int d = 8;
             int count = 1;
-            while (Field.Degree > d)
+            while (_field.Degree > d)
             {
                 count++;
                 d += 8;
             }
 
-            byte[] res = new byte[Coefficients.Length * count];
+            byte[] res = new byte[_coefficients.Length * count];
             count = 0;
-            for (int i = 0; i < Coefficients.Length; i++)
+            for (int i = 0; i < _coefficients.Length; i++)
             {
                 for (int j = 0; j < d; j += 8)
-                    res[count++] = (byte)(IntUtils.URShift(Coefficients[i], j));
+                    res[count++] = (byte)(IntUtils.URShift(_coefficients[i], j));
             }
 
             return res;
@@ -377,8 +369,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <returns>Returns <c>this mod f</c></returns>
         public PolynomialGF2mSmallM Mod(PolynomialGF2mSmallM F)
         {
-            int[] resultCoeff = Mod(Coefficients, F.Coefficients);
-            return new PolynomialGF2mSmallM(Field, resultCoeff);
+            int[] resultCoeff = Mod(_coefficients, F._coefficients);
+            return new PolynomialGF2mSmallM(_field, resultCoeff);
         }
 
         /// <summary>
@@ -391,8 +383,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <returns>Returns <c>this * divisor^(-1) mod modulus</c></returns>
         public PolynomialGF2mSmallM ModDivide(PolynomialGF2mSmallM Divisor, PolynomialGF2mSmallM Modulus)
         {
-            int[] resultCoeff = ModDiv(Coefficients, Divisor.Coefficients, Modulus.Coefficients);
-            return new PolynomialGF2mSmallM(Field, resultCoeff);
+            int[] resultCoeff = ModDiv(_coefficients, Divisor._coefficients, Modulus._coefficients);
+            return new PolynomialGF2mSmallM(_field, resultCoeff);
         }
 
         /// <summary>
@@ -405,9 +397,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         public PolynomialGF2mSmallM ModInverse(PolynomialGF2mSmallM A)
         {
             int[] unit = { 1 };
-            int[] resultCoeff = ModDiv(unit, Coefficients, A.Coefficients);
+            int[] resultCoeff = ModDiv(unit, _coefficients, A._coefficients);
 
-            return new PolynomialGF2mSmallM(Field, resultCoeff);
+            return new PolynomialGF2mSmallM(_field, resultCoeff);
         }
 
         /// <summary>
@@ -420,8 +412,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <returns>Returns <c>this * a mod b</c></returns>
         public PolynomialGF2mSmallM ModMultiply(PolynomialGF2mSmallM A, PolynomialGF2mSmallM B)
         {
-            int[] resultCoeff = ModMultiply(Coefficients, A.Coefficients, B.Coefficients);
-            return new PolynomialGF2mSmallM(Field, resultCoeff);
+            int[] resultCoeff = ModMultiply(_coefficients, A._coefficients, B._coefficients);
+            return new PolynomialGF2mSmallM(_field, resultCoeff);
         }
 
         /// <summary>
@@ -434,9 +426,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <returns>Returns PolynomialGF2mSmallM[] {a,b} with b*this = a mod g and deg(a)&lt;= deg(g)/2</returns>
         public PolynomialGF2mSmallM[] ModPolynomialToFracton(PolynomialGF2mSmallM G)
         {
-            int dg = G.Degree >> 1;
-            int[] a0 = NormalForm(G.Coefficients);
-            int[] a1 = Mod(Coefficients, G.Coefficients);
+            int dg = G._degree >> 1;
+            int[] a0 = NormalForm(G._coefficients);
+            int[] a1 = Mod(_coefficients, G._coefficients);
             int[] b0 = { 0 };
             int[] b1 = { 1 };
 
@@ -445,12 +437,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                 int[][] q = Divide(a0, a1);
                 a0 = a1;
                 a1 = q[1];
-                int[] b2 = Add(b0, ModMultiply(q[0], b1, G.Coefficients));
+                int[] b2 = Add(b0, ModMultiply(q[0], b1, G._coefficients));
                 b0 = b1;
                 b1 = b2;
             }
 
-            return new PolynomialGF2mSmallM[] { new PolynomialGF2mSmallM(Field, a1), new PolynomialGF2mSmallM(Field, b1) };
+            return new PolynomialGF2mSmallM[] { new PolynomialGF2mSmallM(_field, a1), new PolynomialGF2mSmallM(_field, b1) };
         }
 
         /// <summary>
@@ -467,8 +459,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             int[] thisSquare = new int[length];
 
             // square each entry of this polynomial
-            for (int i = 0; i < Coefficients.Length; i++)
-                thisSquare[i] = Field.Multiply(Coefficients[i], Coefficients[i]);
+            for (int i = 0; i < _coefficients.Length; i++)
+                thisSquare[i] = _field.Multiply(_coefficients[i], _coefficients[i]);
 
             // do matrix-vector multiplication
             for (int i = 0; i < length; i++)
@@ -476,15 +468,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                 // compute scalar product of i-th row and coefficient vector
                 for (int j = 0; j < length; j++)
                 {
-                    if (i >= M[j].Coefficients.Length)
+                    if (i >= M[j]._coefficients.Length)
                         continue;
 
-                    int scalarTerm = Field.Multiply(M[j].Coefficients[i], thisSquare[j]);
-                    resultCoeff[i] = Field.Add(resultCoeff[i], scalarTerm);
+                    int scalarTerm = _field.Multiply(M[j]._coefficients[i], thisSquare[j]);
+                    resultCoeff[i] = _field.Add(resultCoeff[i], scalarTerm);
                 }
             }
 
-            return new PolynomialGF2mSmallM(Field, resultCoeff);
+            return new PolynomialGF2mSmallM(_field, resultCoeff);
         }
 
         /// <summary>
@@ -496,16 +488,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <returns>Returns <c>this^(1/2) mod A</c></returns>
         public PolynomialGF2mSmallM ModSquareRoot(PolynomialGF2mSmallM A)
         {
-            int[] resultCoeff = IntUtils.Clone(Coefficients);
-            int[] help = ModMultiply(resultCoeff, resultCoeff, A.Coefficients);
+            int[] resultCoeff = IntUtils.Clone(_coefficients);
+            int[] help = ModMultiply(resultCoeff, resultCoeff, A._coefficients);
 
-            while (!IsEqual(help, Coefficients))
+            while (!IsEqual(help, _coefficients))
             {
                 resultCoeff = NormalForm(help);
-                help = ModMultiply(resultCoeff, resultCoeff, A.Coefficients);
+                help = ModMultiply(resultCoeff, resultCoeff, A._coefficients);
             }
 
-            return new PolynomialGF2mSmallM(Field, resultCoeff);
+            return new PolynomialGF2mSmallM(_field, resultCoeff);
         }
 
         /// <summary>
@@ -526,22 +518,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                 // compute scalar product of i-th row and j-th column
                 for (int j = 0; j < length; j++)
                 {
-                    if (i >= M[j].Coefficients.Length)
+                    if (i >= M[j]._coefficients.Length)
                         continue;
 
-                    if (j < Coefficients.Length)
+                    if (j < _coefficients.Length)
                     {
-                        int scalarTerm = Field.Multiply(M[j].Coefficients[i], Coefficients[j]);
-                        resultCoeff[i] = Field.Add(resultCoeff[i], scalarTerm);
+                        int scalarTerm = _field.Multiply(M[j]._coefficients[i], _coefficients[j]);
+                        resultCoeff[i] = _field.Add(resultCoeff[i], scalarTerm);
                     }
                 }
             }
 
             // compute the square root of each entry of the result coefficients
             for (int i = 0; i < length; i++)
-                resultCoeff[i] = Field.Sqrt(resultCoeff[i]);
+                resultCoeff[i] = _field.Sqrt(resultCoeff[i]);
 
-            return new PolynomialGF2mSmallM(Field, resultCoeff);
+            return new PolynomialGF2mSmallM(_field, resultCoeff);
         }
 
         /// <summary>
@@ -553,9 +545,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <returns>Returns <c>this * factor</c></returns>
         public PolynomialGF2mSmallM Multiply(PolynomialGF2mSmallM Factor)
         {
-            int[] resultCoeff = Multiply(Coefficients, Factor.Coefficients);
+            int[] resultCoeff = Multiply(_coefficients, Factor._coefficients);
 
-            return new PolynomialGF2mSmallM(Field, resultCoeff);
+            return new PolynomialGF2mSmallM(_field, resultCoeff);
         }
 
         /// <summary>
@@ -567,12 +559,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <returns>Return <c>this * element</c> (newly created)</returns>
         public PolynomialGF2mSmallM MultWithElement(int Element)
         {
-            if (!Field.IsElementOfThisField(Element))
+            if (!_field.IsElementOfThisField(Element))
                 throw new ArithmeticException("Not an element of the finite field this polynomial is defined over.");
             
-            int[] resultCoeff = MultWithElement(Coefficients, Element);
+            int[] resultCoeff = MultWithElement(_coefficients, Element);
 
-            return new PolynomialGF2mSmallM(Field, resultCoeff);
+            return new PolynomialGF2mSmallM(_field, resultCoeff);
         }
 
         /// <summary>
@@ -582,10 +574,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <param name="Element">An element of the finite field GF(2^m)</param>
         public void MultThisWithElement(int Element)
         {
-            if (!Field.IsElementOfThisField(Element))
+            if (!_field.IsElementOfThisField(Element))
                 throw new ArithmeticException("Not an element of the finite field this polynomial is defined over.");
             
-            Coefficients = MultWithElement(Coefficients, Element);
+            _coefficients = MultWithElement(_coefficients, Element);
             ComputeDegree();
         }
 
@@ -608,7 +600,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
 
             int[] result = new int[degree + 1];
             for (int i = degree; i >= 0; i--)
-                result[i] = Field.Multiply(A[i], Element);
+                result[i] = _field.Multiply(A[i], Element);
 
             return result;
         }
@@ -622,8 +614,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <returns>Return <c>this * X^k</c></returns>
         public PolynomialGF2mSmallM MultWithMonomial(int K)
         {
-            int[] resultCoeff = MultWithMonomial(Coefficients, K);
-            return new PolynomialGF2mSmallM(Field, resultCoeff);
+            int[] resultCoeff = MultWithMonomial(_coefficients, K);
+            return new PolynomialGF2mSmallM(_field, resultCoeff);
         }
         #endregion
 
@@ -642,7 +634,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
 
             PolynomialGF2mSmallM p = (PolynomialGF2mSmallM)Obj;
 
-            if ((Field.Equals(p.Field)) && (Degree.Equals(p.Degree)) && (Compare.AreEqual(Coefficients, p.Coefficients)))
+            if ((_field.Equals(p._field)) && (_degree.Equals(p._degree)) && (Compare.AreEqual(_coefficients, p._coefficients)))
                 return true;
 
             return false;
@@ -655,9 +647,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <returns>The hash code</returns>
         public override int GetHashCode()
         {
-            int hash = Field.GetHashCode();
-            for (int j = 0; j < Coefficients.Length; j++)
-                hash = hash * 31 + Coefficients[j];
+            int hash = _field.GetHashCode();
+            for (int j = 0; j < _coefficients.Length; j++)
+                hash = hash * 31 + _coefficients[j];
             
             return hash;
         }
@@ -669,10 +661,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <returns>Returns a human readable form of the polynomial</returns>
         public override String ToString()
         {
-            String str = " Polynomial over " + Field.ToString() + ": \n";
+            String str = " Polynomial over " + _field.ToString() + ": \n";
 
-            for (int i = 0; i < Coefficients.Length; i++)
-                str = str + Field.ElementToString(Coefficients[i]) + "Y^" + i + "+";
+            for (int i = 0; i < _coefficients.Length; i++)
+                str = str + _field.ElementToString(_coefficients[i]) + "Y^" + i + "+";
             
             str = str + ";";
 
@@ -706,7 +698,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             }
 
             for (int i = addend.Length - 1; i >= 0; i--)
-                result[i] = Field.Add(result[i], addend[i]);
+                result[i] = _field.Add(result[i], addend[i]);
 
             return result;
         }
@@ -716,7 +708,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// </summary>
         private void ComputeDegree()
         {
-            for (_degree = Coefficients.Length - 1; _degree >= 0 && Coefficients[_degree] == 0; _degree--)
+            for (_degree = _coefficients.Length - 1; _degree >= 0 && _coefficients[_degree] == 0; _degree--)
                 { ; }
         }
 
@@ -729,10 +721,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <returns>Returns the degree of the polynomial <c>a</c>. If <c>a</c> is the zero polynomial, return -1</returns>
         private static int ComputeDegree(int[] A)
         {
-            int deg;
-            for (deg = A.Length - 1; deg >= 0 && A[deg] == 0; deg--)
+            int degree;
+            for (degree = A.Length - 1; degree >= 0 && A[degree] == 0; degree--)
                 { ; }
-            return deg;
+            return degree;
         }
 
         /// <summary>
@@ -747,18 +739,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         {
             int[] resCoeff = new int[Degree + 1];
             resCoeff[Degree] = 1;
-            resCoeff[0] = Field.GetRandomNonZeroElement(SecRnd);
-
+            resCoeff[0] = _field.GetRandomNonZeroElement(SecRnd);
             for (int i = 1; i < Degree; i++)
-                resCoeff[i] = Field.GetRandomElement(SecRnd);
+                resCoeff[i] = _field.GetRandomElement(SecRnd);
 
             while (!IsIrreducible(resCoeff))
             {
                 int n = RandomDegree.NextInt(SecRnd, Degree);
                 if (n == 0)
-                    resCoeff[0] = Field.GetRandomNonZeroElement(SecRnd);
+                    resCoeff[0] = _field.GetRandomNonZeroElement(SecRnd);
                 else
-                    resCoeff[n] = Field.GetRandomElement(SecRnd);
+                    resCoeff[n] = _field.GetRandomElement(SecRnd);
             }
 
             return resCoeff;
@@ -783,7 +774,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             result[0] = new int[1];
             result[1] = new int[da];
             int hc = HeadCoefficient(F);
-            hc = Field.Inverse(hc);
+            hc = _field.Inverse(hc);
             result[0][0] = 0;
             Array.Copy(A, 0, result[1], 0, result[1].Length);
 
@@ -791,7 +782,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             {
                 int[] q;
                 int[] coeff = new int[1];
-                coeff[0] = Field.Multiply(HeadCoefficient(result[1]), hc);
+                coeff[0] = _field.Multiply(HeadCoefficient(result[1]), hc);
                 q = MultWithElement(F, coeff[0]);
                 int n = ComputeDegree(result[1]) - df;
                 q = MultWithMonomial(q, n);
@@ -858,7 +849,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             int d = ComputeDegree(A) >> 1;
             int[] u = { 0, 1 };
             int[] Y = { 0, 1 };
-            int fieldDegree = Field.Degree;
+            int fieldDegree = _field.Degree;
 
             for (int i = 0; i < d; i++)
             {
@@ -867,7 +858,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
 
                 u = NormalForm(u);
                 int[] g = Gcd(Add(u, Y), A);
-
                 if (ComputeDegree(g) != 0)
                     return false;
             }
@@ -891,13 +881,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
 
             int[] result = new int[A.Length];
             int hc = HeadCoefficient(F);
-            hc = Field.Inverse(hc);
+            hc = _field.Inverse(hc);
             Array.Copy(A, 0, result, 0, result.Length);
-
             while (df <= ComputeDegree(result))
             {
                 int[] q;
-                int coeff = Field.Multiply(HeadCoefficient(result), hc);
+                int coeff = _field.Multiply(HeadCoefficient(result), hc);
                 q = MultWithMonomial(F, ComputeDegree(result) - df);
                 q = MultWithElement(q, coeff);
                 result = Add(q, result);
@@ -933,9 +922,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                 s0 = NormalForm(s1);
                 s1 = NormalForm(s2);
             }
-
             int hc = HeadCoefficient(r0);
-            s0 = MultWithElement(s0, Field.Inverse(hc));
+            s0 = MultWithElement(s0, _field.Inverse(hc));
 
             return s0;
         }
@@ -1058,7 +1046,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             if (d == -1)
                 return new int[1];
 
-            // if a is already in normal form
+            // if a already is in normal form
             if (A.Length == d + 1)
                 return IntUtils.Clone(A);
 

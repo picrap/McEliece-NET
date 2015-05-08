@@ -100,7 +100,7 @@ namespace Test.Tests
             {
                 mpe.Initialize(true, akp);
 
-                int sz = mpe.MaxPlainText - 1;
+                int sz = mpe.MaxPlainText;
                 byte[] data = new byte[sz];
                 new CSPRng().GetBytes(data);
 
@@ -120,7 +120,7 @@ namespace Test.Tests
                 mpar = new MPKCParameters(11, 40, McElieceCiphers.KobaraImai);
                 mpe.Initialize(true, akp);
 
-                int sz = mpe.MaxPlainText - 1;
+                int sz = mpe.MaxPlainText;
                 byte[] data = new byte[sz];
                 new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPRng().GetBytes(data);
 
@@ -140,7 +140,7 @@ namespace Test.Tests
                 mpar = new MPKCParameters(11, 40, McElieceCiphers.Pointcheval);
                 mpe.Initialize(true, akp);
 
-                int sz = mpe.MaxPlainText - 1;
+                int sz = mpe.MaxPlainText;
                 byte[] data = new byte[sz];
                 new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPRng().GetBytes(data);
 

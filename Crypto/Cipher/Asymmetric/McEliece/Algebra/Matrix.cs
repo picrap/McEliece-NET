@@ -8,7 +8,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
     /// This abstract class defines matrices.
     /// <para>It holds the number of rows and the number of columns of the matrix and defines some basic methods.</para>
     /// </summary>
-    public abstract class Matrix
+    internal abstract class Matrix
     {
         #region Constants
         /// <summary>
@@ -37,11 +37,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <summary>
         /// Number of columns
         /// </summary>
-        private int _columnCount;
+        protected int _columnCount;
         /// <summary>
         /// Number of rows
         /// </summary>
-        private int _rowCount;
+        protected int _rowCount;
         #endregion
 
         #region Properties
@@ -92,7 +92,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// the matrix is multiplied by each m-bit part of the vector.</para>
         /// </summary>
         /// 
-        /// <param name="V">A vector</param>
+        /// <param name="Vector">A vector</param>
         /// 
         /// <returns>Returns <c>V * this</c></returns>
         public abstract Vector LeftMultiply(Vector V);
@@ -101,7 +101,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// Compute the product of this matrix and another matrix
         /// </summary>
         /// 
-        /// <param name="M">The other matrix</param>
+        /// <param name="A">The other matrix</param>
         /// 
         /// <returns>Returns <c>this * M</c></returns>
         public abstract Matrix RightMultiply(Matrix M);
@@ -119,7 +119,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// Compute the product of this matrix and a vector
         /// </summary>
         /// 
-        /// <param name="V">A vector</param>
+        /// <param name="Vector">A vector</param>
         /// 
         /// <returns>Returns <c>this * V</c> </returns>
         public abstract Vector RightMultiply(Vector V);

@@ -10,7 +10,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
     /// This class stores very long strings of bits and does some basic arithmetics.
     /// <para>It is used by <c>GF2nField</c>, <c>GF2nPolynomialField</c> and <c>GFnPolynomialElement</c>.</para>
     /// </summary>
-    public sealed class GF2Polynomial
+    internal sealed class GF2Polynomial
     {
         #region Fields
         // number of bits stored in this GF2Polynomial

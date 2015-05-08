@@ -280,7 +280,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <summary>
         /// Computes the field polynomial. This can take a long time for big degrees.
         /// </summary>
-        public void ComputeFieldPolynomial2()
+        protected void ComputeFieldPolynomial2()
         {
             if (TestTrinomials())
                 return;

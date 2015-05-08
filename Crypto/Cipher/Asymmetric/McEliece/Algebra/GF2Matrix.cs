@@ -12,7 +12,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
     /// <summary>
     /// This class describes some operations with matrices over finite field GF(2) and is used in ecc and MQ-PKC (also has some specific methods and implementation).
     /// </summary>
-    public sealed class GF2Matrix : Matrix
+    internal sealed class GF2Matrix : Matrix
     {
         #region Fields
         // For the matrix representation the array of type int[][] is used, thus one
@@ -197,7 +197,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             ColumnCount = N;
             _length = IntUtils.URShift((N + 31), 5);
             _matrix = ArrayUtils.CreateJagged<int[][]>(RowCount, _length);
-            
+
             for (int i = 0; i < RowCount; i++)
             {
                 for (int j = 0; j < _length; j++)
@@ -337,7 +337,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// </summary>
         public void Clear()
         {
-            if (_length != 0)
+            if (_length != null)
                 _length = 0;
             if (_matrix != null)
             {

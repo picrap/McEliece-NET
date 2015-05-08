@@ -49,7 +49,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <summary>
         /// Get: Returns the generator matrix
         /// </summary>
-        public GF2Matrix G
+        internal GF2Matrix G
         {
             get { return _G; }
         }
@@ -80,7 +80,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <param name="N">The length of the code</param>
         /// <param name="T">The error correction capability of the code</param>
         /// <param name="G">The generator matrix</param>
-        public MPKCPublicKey(byte[] Oid, int N, int T, GF2Matrix G)
+        internal MPKCPublicKey(byte[] Oid, int N, int T, GF2Matrix G)
         {
             _Oid = new byte[OID_LENGTH];
             Array.Copy(Oid, _Oid, Math.Min(Oid.Length, OID_LENGTH));
@@ -96,14 +96,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <param name="Oid">The 32 byte identifier</param>
         /// <param name="T">The error correction capability of the code</param>
         /// <param name="N">The length of the code</param>
-        /// <param name="EncG">The encoded generator matrix</param>
-        public MPKCPublicKey(byte[] Oid, int T, int N, byte[] EncG)
+        /// <param name="G">The encoded generator matrix</param>
+        public MPKCPublicKey(byte[] Oid, int T, int N, byte[] G)
         {
             _Oid = new byte[OID_LENGTH];
             Array.Copy(Oid, _Oid, Math.Min(Oid.Length, OID_LENGTH));
             _N = N;
             _T = T;
-            _G = new GF2Matrix(EncG);
+            _G = new GF2Matrix(G);
         }
 
         /// <summary>

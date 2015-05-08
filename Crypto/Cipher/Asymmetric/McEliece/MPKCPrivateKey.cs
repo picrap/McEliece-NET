@@ -34,7 +34,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <summary>
         /// Get: Returns the finite field <c>GF(2^m)</c>
         /// </summary>
-        public GF2mField GF
+        internal GF2mField GF
         {
             get { return _gField; }
         }
@@ -42,7 +42,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <summary>
         /// Get: Returns the irreducible Goppa polynomial
         /// </summary>
-        public PolynomialGF2mSmallM GP
+        internal PolynomialGF2mSmallM GP
         {
             get { return _goppaPoly; }
         }
@@ -50,7 +50,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <summary>
         /// Get: Returns the canonical check matrix H
         /// </summary>
-        public GF2Matrix H
+        internal GF2Matrix H
         {
             get { return _H; }
         }
@@ -82,7 +82,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <summary>
         /// Get: Returns the permutation used to generate the systematic check matrix
         /// </summary>
-        public Permutation P1
+        internal Permutation P1
         {
             get { return _P1; }
         }
@@ -90,7 +90,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <summary>
         /// Get: Returns the matrix used to compute square roots in <c>(GF(2^m))^t</c>
         /// </summary>
-        public PolynomialGF2mSmallM[] QInv
+        internal PolynomialGF2mSmallM[] QInv
         {
             get { return _qInv; }
         }
@@ -117,7 +117,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <param name="P">The permutation</param>
         /// <param name="H">The canonical check matrix</param>
         /// <param name="QInv">The matrix used to compute square roots in <c>(GF(2^m))^t</c></param>
-        public MPKCPrivateKey(byte[] Oid, int N, int K, GF2mField Gf, PolynomialGF2mSmallM Gp, Permutation P, GF2Matrix H, PolynomialGF2mSmallM[] QInv)
+        internal MPKCPrivateKey(byte[] Oid, int N, int K, GF2mField Gf, PolynomialGF2mSmallM Gp, Permutation P, GF2Matrix H, PolynomialGF2mSmallM[] QInv)
         {
             _Oid = new byte[OID_LENGTH];
             Array.Copy(Oid, _Oid, Math.Min(Oid.Length, OID_LENGTH));
@@ -137,25 +137,25 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <param name="Oid">OID of the algorithm</param>
         /// <param name="N">Length of the code</param>
         /// <param name="K">The dimension of the code</param>
-        /// <param name="EncGf">Encoded field polynomial defining the finite field <c>GF(2^m)</c></param>
-        /// <param name="EncGp">Encoded irreducible Goppa polynomial</param>
-        /// <param name="EncP">The encoded permutation</param>
-        /// <param name="EncH">Encoded canonical check matrix</param>
-        /// <param name="EncQInv">The encoded matrix used to compute square roots in <c>(GF(2^m))^t</c></param>
-        public MPKCPrivateKey(byte[] Oid, int N, int K, byte[] EncGf, byte[] EncGp, byte[] EncP, byte[] EncH, byte[][] EncQInv)
+        /// <param name="Gf">Encoded field polynomial defining the finite field <c>GF(2^m)</c></param>
+        /// <param name="Gp">Encoded irreducible Goppa polynomial</param>
+        /// <param name="P">The encoded permutation</param>
+        /// <param name="H">Encoded canonical check matrix</param>
+        /// <param name="QInv">The encoded matrix used to compute square roots in <c>(GF(2^m))^t</c></param>
+        public MPKCPrivateKey(byte[] Oid, int N, int K, byte[] Gf, byte[] Gp, byte[] P, byte[] H, byte[][] QInv)
         {
             _Oid = new byte[OID_LENGTH];
             Array.Copy(Oid, _Oid, Math.Min(Oid.Length, OID_LENGTH));
             _N = N;
             _K = K;
-            _gField = new GF2mField(EncGf);
-            _goppaPoly = new PolynomialGF2mSmallM(_gField, EncGp);
-            _P1 = new Permutation(EncP);
-            _H = new GF2Matrix(EncH);
-            _qInv = new PolynomialGF2mSmallM[EncQInv.Length];
+            _gField = new GF2mField(Gf);
+            _goppaPoly = new PolynomialGF2mSmallM(_gField, Gp);
+            _P1 = new Permutation(P);
+            _H = new GF2Matrix(H);
+            _qInv = new PolynomialGF2mSmallM[QInv.Length];
 
-            for (int i = 0; i < EncQInv.Length; i++)
-                _qInv[i] = new PolynomialGF2mSmallM(_gField, EncQInv[i]);
+            for (int i = 0; i < QInv.Length; i++)
+                _qInv[i] = new PolynomialGF2mSmallM(_gField, QInv[i]);
         }
 
         /// <summary>
@@ -210,7 +210,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
                 // p1
                 len = reader.ReadInt32();
                 byte[] p1 = reader.ReadBytes(len);
-
                 // check matrix
                 len = reader.ReadInt32();
                 byte[] h = reader.ReadBytes(len);

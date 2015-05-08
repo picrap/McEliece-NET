@@ -10,7 +10,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
     /// <summary>
     /// This class implements vectors over the finite field <c>GF(2^m)</c> for small <c>m</c> (i.e., <c>1&lt;m&lt;32</c>). It extends the abstract class Vector.
     /// </summary>
-    public sealed class GF2mVector : Vector
+    internal sealed class GF2mVector : Vector
     {
         #region Fields
         //he finite field this vector is defined over

@@ -40,12 +40,12 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="Body">The functions body</param>
         public static void While(Func<bool> Condition, Action Body)
         {
-            Parallel.ForEach(IterateUntilFalse(Condition), ignored => Body());
+            Parallel.ForEach(Until(Condition), dlg => Body());
         }
 
-        private static IEnumerable<bool> IterateUntilFalse(Func<bool> condition)
+        private static IEnumerable<bool> Until(Func<bool> Condition)
         {
-            while (condition()) yield return true;
+            while (Condition()) yield return true;
         }
     }
 }

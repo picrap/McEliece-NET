@@ -85,7 +85,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
 
             byte[] mrBytes;
             // get PRNG object
-            using (PBKDF2 sr0 = new PBKDF2(new Keccak256()))
+            using (KDF2Drbg sr0 = new KDF2Drbg(new Keccak256()))
             {
                 // seed PRNG with r'
                 sr0.Initialize(rPrimeBytes);
@@ -142,7 +142,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
             byte[] c1 = CCA2Primitives.Encrypt((MPKCPublicKey)_keyPair.PublicKey, rPrime, z).GetEncoded();
             byte[] c2;
             // get PRNG object
-            using (PBKDF2 sr0 = new PBKDF2(new Keccak256()))
+            using (KDF2Drbg sr0 = new KDF2Drbg(new Keccak256()))
             {
                 // seed PRNG with r'
                 sr0.Initialize(rPrimeBytes);

@@ -8,7 +8,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
     /// <summary>
     /// This abstract class defines a Vector object
     /// </summary>
-    public abstract class Vector : List<object>
+    internal abstract class Vector : List<object>
     {
         #region Fields
         private int _length;
@@ -65,21 +65,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <param name="Obj">The object for comprison</param>
         /// 
         /// <returns>Returns <c>true</c> if the two objects are equal, <c>false</c> otherwise</returns>
-        public override abstract bool Equals(Object Obj);
+        public abstract bool Equals(Object other);
 
         /// <summary>
         /// Returns the hash code of this element
         /// </summary>
         /// 
         /// <returns>The hash code</returns>
-        public override abstract int GetHashCode();
+        public abstract int GetHashCode();
 
         /// <summary>
         /// Returns a string representing this Bitstrings value using hexadecimal radix in MSB-first order
         /// </summary>
         /// 
         /// <returns>Returns a String representing this Bitstrings value</returns>
-        public override abstract String ToString();
+        public abstract String ToString();
         #endregion
     }
 }

@@ -8,7 +8,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
     /// <summary>
     /// This interface defines a finite field element. It is implemented by the classes GFPElement and GF2nElement
     /// </summary>
-    public interface IGFElement
+    internal interface IGFElement
     {
         /// <summary>
         /// Compute the sum of this element and the addend
@@ -34,13 +34,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         Object Clone();
 
         /// <summary>
-        /// Decides whether the given object <c>Obj</c> is the same as this field
+        /// Decides whether the given object <c>other</c> is the same as this field
         /// </summary>
         /// 
         /// <param name="Obj">The object for comparison</param>
         /// 
-        /// <returns>Returns <c>(this == Obj)</c></returns>
-        bool Equals(Object Obj);
+        /// <returns>Returns <c>(this == other)</c></returns>
+        bool Equals(Object other);
 
         /// <summary>
         /// Returns the hash code of this field
