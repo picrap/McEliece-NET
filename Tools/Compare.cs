@@ -249,33 +249,5 @@ namespace VTDev.Libraries.CEXEngine.Tools
 
             return true;
         }
-
-        /// <summary>
-        /// Compare Integer Arrays
-        /// </summary>
-        /// 
-        /// <typeparam name="T">Type of array</typeparam>
-        /// <param name="A">Array A</param>
-        /// <param name="B">Array B</param>
-        /// 
-        /// <returns>Equal</returns>
-        [System.CLSCompliant(false)]
-        public static bool AreEqual<T>(T[][] A, T[][] B)
-        {
-            int len = A.Length;
-
-            if (len != B.Length)
-                return false;
-
-            while (len != 0)
-            {
-                --len;
-                if (!AreEqual(A, B))
-                    return false;
-            }
-
-            return true;
-        }
-
     }
 }

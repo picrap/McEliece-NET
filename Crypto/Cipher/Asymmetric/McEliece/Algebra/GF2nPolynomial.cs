@@ -80,6 +80,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             int i;
             _coeff = new GF2nElement[G._size];
             _size = G._size;
+
             for (i = 0; i < _size; i++)
                 _coeff[i] = (GF2nElement)G._coeff[i].Clone();
         }
@@ -138,6 +139,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             {
                 result = new GF2nPolynomial(Size);
                 int i;
+
                 for (i = 0; i < P.Size; i++)
                     result._coeff[i] = (GF2nElement)_coeff[i].Add(P._coeff[i]);
                 for (; i < Size; i++)
@@ -147,6 +149,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             {
                 result = new GF2nPolynomial(P.Size);
                 int i;
+
                 for (i = 0; i < Size; i++)
                     result._coeff[i] = (GF2nElement)_coeff[i].Add(P._coeff[i]);
                 for (; i < P.Size; i++)
@@ -207,6 +210,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             result[0] = new GF2nPolynomial(this);
             result[0].AssignZeroToElements();
             int i = a.Degree - bDegree;
+
             while (i >= 0)
             {
                 factor = (GF2nElement)a._coeff[a.Degree].Multiply(inv);

@@ -59,8 +59,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             {
                 for (int j = 0; j < this.ColumnCount; j++)
                 {
-                    for (int jj = 0; jj < d; jj += 8)
-                        MatrixN[i][j] ^= (Encoded[count++] & 0x000000ff) << jj;
+                    for (int k = 0; k < d; k += 8)
+                        MatrixN[i][j] ^= (Encoded[count++] & 0x000000ff) << k;
                     
                     if (!this.FieldG.IsElementOfThisField(MatrixN[i][j]))
                         throw new ArgumentException("GF2mMatrix: Given array is not encoded matrix over GF(2^m)!");
@@ -81,7 +81,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             MatrixN = new int[RowCount][];
 
             for (int i = 0; i < RowCount; i++)
-                MatrixN[i] = IntUtils.Clone(G.MatrixN[i]);
+                MatrixN[i] = IntUtils.DeepCopy(G.MatrixN[i]);
         }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             // clone this matrix
             int[][] tmpMatrix = ArrayUtils.CreateJagged<int[][]>(RowCount, RowCount);
             for (int i = RowCount - 1; i >= 0; i--)
-                tmpMatrix[i] = IntUtils.Clone(MatrixN[i]);
+                tmpMatrix[i] = IntUtils.DeepCopy(MatrixN[i]);
 
             // initialize inverse matrix as unit matrix
             int[][] invMatrix = ArrayUtils.CreateJagged<int[][]>(RowCount, RowCount);

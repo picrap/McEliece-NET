@@ -88,7 +88,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         {
             if (Encoded.Length != 4)
                 throw new ArgumentException("byte array is not an encoded finite field");
+
             _polynomial = LittleEndian.OctetsToInt(Encoded);
+
             if (!PolynomialRingGF2.IsIrreducible(_polynomial))
                 throw new ArgumentException("byte array is not an encoded finite field");
 
@@ -128,6 +130,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         {
             if (_polynomial != null)
                 _polynomial = 0;
+
             _degree = 0;
         }
 
@@ -145,6 +148,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                     s = "0" + s;
                 else
                     s = "1" + s;
+
                 A = IntUtils.URShift(A, 1);
             }
             return s;
@@ -166,6 +170,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                 return 1;
             
             int result = 1;
+
             if (K < 0)
             {
                 A = Inverse(A);

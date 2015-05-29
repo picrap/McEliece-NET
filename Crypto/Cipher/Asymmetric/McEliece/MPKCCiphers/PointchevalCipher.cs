@@ -34,6 +34,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
         private int _K; 
         private int _N;
         private int _T;
+        private MPKCParameters _cipherParams;
         #endregion
 
         #region Properties
@@ -54,6 +55,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
         /// <param name="Parameters">The cipher parameters</param>
         public PointchevalCipher(MPKCParameters Parameters)
         {
+            _cipherParams = Parameters;
             _dgtEngine = GetDigest(Parameters.Digest);
         }
 
@@ -85,7 +87,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
 
             byte[] mrBytes;
             // get PRNG object
-            using (KDF2Drbg sr0 = new KDF2Drbg(new Keccak256()))
+            using (KDF2Drbg sr0 = new KDF2Drbg(GetDigest(_cipherParams.Digest)))
             {
                 // seed PRNG with r'
                 sr0.Initialize(rPrimeBytes);
@@ -108,7 +110,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
 
             // check that Conv(H(m||r)) = z
             if (!c1Vec.Equals(z))
-                throw new Exception("Bad Padding: Invalid ciphertext!");
+                throw new Exception("Bad Padding: Invalid ciphertext!");// Note: will throw (sometimes), but only on Pointcheval w/ small m/t?
 
             // split (m||r) to obtain m
             int kDiv8 = _K >> 3;
@@ -142,7 +144,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
             byte[] c1 = CCA2Primitives.Encrypt((MPKCPublicKey)_keyPair.PublicKey, rPrime, z).GetEncoded();
             byte[] c2;
             // get PRNG object
-            using (KDF2Drbg sr0 = new KDF2Drbg(new Keccak256()))
+            using (KDF2Drbg sr0 = new KDF2Drbg(GetDigest(_cipherParams.Digest)))
             {
                 // seed PRNG with r'
                 sr0.Initialize(rPrimeBytes);
@@ -193,12 +195,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
             if (_isEncryption)
             {
                 _secRnd = new SecureRandom();
-                InitEncryption((MPKCPublicKey)KeyPair.PublicKey);
+                _N = ((MPKCPublicKey)KeyPair.PublicKey).N;
+                _K = ((MPKCPublicKey)KeyPair.PublicKey).K;
+                _T = ((MPKCPublicKey)KeyPair.PublicKey).T;
                 _maxPlainText = (((MPKCPublicKey)KeyPair.PublicKey).K >> 3);
             }
             else
             {
-                InitDecryption((MPKCPrivateKey)KeyPair.PrivateKey);
+                _N = ((MPKCPrivateKey)KeyPair.PrivateKey).N;
+                _K = ((MPKCPrivateKey)KeyPair.PrivateKey).K;
+                _T = ((MPKCPrivateKey)KeyPair.PrivateKey).T;
             }
         }
         #endregion

@@ -59,10 +59,10 @@ namespace Test.Tests
         #region Private Methods
         private void TestParams()
         {
-            MPKCParameters mpar = new MPKCParameters(11, 40);
+            MPKCParameters mpar = MPKCParamSets.MPKCFM11T40S256;
             byte[] enc = mpar.ToBytes();
 
-            using (MPKCParameters mpar2 = MPKCParameters.Read(enc))
+            using (MPKCParameters mpar2 = MPKCParameters.From(enc))
             {
                 if (!mpar.Equals(mpar2))
                     throw new Exception("EncryptionKey: public key comparison test failed!");
@@ -70,7 +70,7 @@ namespace Test.Tests
             OnProgress(new TestEventArgs("Passed parameters byte serialization"));
 
             MemoryStream mstr = mpar.ToStream();
-            using (MPKCParameters mpar2 = MPKCParameters.Read(mstr))
+            using (MPKCParameters mpar2 = MPKCParameters.From(mstr))
             {
                 if (!mpar.Equals(mpar2))
                     throw new Exception("EncryptionKey: public key comparison test failed!");

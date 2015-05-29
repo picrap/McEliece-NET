@@ -59,13 +59,13 @@ namespace Test.Tests
         #region Private Methods
         private void TestEncode()
         {
-            MPKCParameters mpar = new MPKCParameters(11, 40);
+            MPKCParameters mpar = MPKCParamSets.MPKCFM11T40S256;
             MPKCKeyGenerator mkgen = new MPKCKeyGenerator(mpar);
             IAsymmetricKeyPair akp = mkgen.GenerateKeyPair();
 
             MPKCPublicKey pub = (MPKCPublicKey)akp.PublicKey;
             byte[] enc = pub.ToBytes();
-            using (MPKCPublicKey pub2 = MPKCPublicKey.Read(enc))
+            using (MPKCPublicKey pub2 = MPKCPublicKey.From(enc))
             {
                 if (!pub.Equals(pub2))
                     throw new Exception("EncryptionKey: public key comparison test failed!");
@@ -73,7 +73,7 @@ namespace Test.Tests
             OnProgress(new TestEventArgs("Passed public key serialization"));
 
             MemoryStream pubstr = pub.ToStream();
-            using (MPKCPublicKey pub2 = MPKCPublicKey.Read(pubstr))
+            using (MPKCPublicKey pub2 = MPKCPublicKey.From(pubstr))
             {
                 if (!pub.Equals(pub2))
                     throw new Exception("EncryptionKey: public key comparison test failed!");
@@ -83,7 +83,7 @@ namespace Test.Tests
 
             MPKCPrivateKey pri = (MPKCPrivateKey)akp.PrivateKey;
             enc = pri.ToBytes();
-            using (MPKCPrivateKey pri2 = MPKCPrivateKey.Read(enc))
+            using (MPKCPrivateKey pri2 = MPKCPrivateKey.From(enc))
             {
                 if (!pri.Equals(pri2))
                     throw new Exception("EncryptionKey: private key comparison test failed!");
@@ -91,7 +91,7 @@ namespace Test.Tests
             OnProgress(new TestEventArgs("Passed private key serialization"));
 
             MemoryStream pristr = pri.ToStream();
-            using (MPKCPrivateKey pri2 = MPKCPrivateKey.Read(pristr))
+            using (MPKCPrivateKey pri2 = MPKCPrivateKey.From(pristr))
             {
                 if (!pri.Equals(pri2))
                     throw new Exception("EncryptionKey: private key comparison test failed!");

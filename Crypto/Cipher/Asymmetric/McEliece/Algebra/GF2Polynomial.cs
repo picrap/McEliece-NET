@@ -269,8 +269,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                 _value[i] |= (int)(((val[m - 2]) << 16) & 0x00ff0000);
                 _value[i] |= (int)(((val[m - 3]) << 24) & 0xff000000);
             }
+
             if ((_length & 0x1f) != 0)
                 _value[_blocks - 1] &= _reverseRightMask[_length & 0x1f];
+
             ReduceN();
         }
 
@@ -283,7 +285,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         {
             _length = B._length;
             _blocks = B._blocks;
-            _value = IntUtils.Clone(B._value);
+            _value = IntUtils.DeepCopy(B._value);
         }
         #endregion
 
@@ -493,12 +495,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             
             a.ReduceN();
             b.ReduceN();
+
             if (a._length < b._length)
             {
                 result[0] = new GF2Polynomial(0);
                 result[1] = a;
                 return result;
             }
+
             i = a._length - b._length;
             q.ExpandN(i + 1);
 
@@ -531,6 +535,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
 
             _length = I;
             k = (IntUtils.URShift((I - 1), 5)) + 1;
+
             if (_blocks >= k)
                 return;
 
@@ -543,6 +548,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                 _blocks = k;
                 return;
             }
+
             bs = new int[k];
             Array.Copy(_value, 0, bs, 0, _blocks);
             _blocks = k;
@@ -642,6 +648,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                 u.SquareThisPreCalc();
                 u = u.Remainder(f);
                 dummy = u.Add(new GF2Polynomial(32, "X"));
+
                 if (!dummy.IsZero())
                 {
                     g = f.Gcd(dummy);
@@ -669,6 +676,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                 if (_value[i] != 0)
                     return false;
             }
+
             if (_value[0] != 0x01)
                 return false;
             
@@ -760,6 +768,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             GF2Polynomial b = new GF2Polynomial(G);
             GF2Polynomial j;
             int i;
+
             if (b.IsZero())
                 throw new Exception();
             
@@ -853,6 +862,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
 
             int max = IntUtils.URShift(((M << 1) - 2), 5);
             int min = p0;
+
             for (i = max; i > min; i--)
             {
                 t = _value[i] & 0x00000000ffffffffL;
@@ -869,6 +879,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
 
             t = _value[min] & 0x00000000ffffffffL & (0xffffffffL << (M & 0x1f));
             _value[0] ^= IntUtils.URShift((int)t, (32 - q0));
+
             if (min - p1 - 1 >= 0)
                 _value[min - p1 - 1] ^= (int)(t << q1);
 
@@ -954,6 +965,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             
             a.ReduceN();
             b.ReduceN();
+
             if (a._length < b._length)
                 return a;
             
@@ -1071,6 +1083,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             int i;
             ExpandN(B._length + K);
             int d = IntUtils.URShift(K, 5);
+
             for (i = B._blocks - 1; i >= 0; i--)
             {
                 if ((i + d + 1 < _blocks) && ((K & 0x1f) != 0))
@@ -1127,11 +1140,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             GF2Polynomial result = new GF2Polynomial(_length - 1);
             int i;
             Array.Copy(_value, 0, result._value, 0, result._blocks);
+
             for (i = 0; i <= result._blocks - 2; i++)
             {
                 result._value[i] = IntUtils.URShift(result._value[i], 1);
                 result._value[i] |= result._value[i + 1] << 31;
             }
+
             result._value[result._blocks - 1] = IntUtils.URShift(result._value[result._blocks - 1], 1);
             if (result._blocks < _blocks)
                 result._value[result._blocks - 1] |= _value[result._blocks] << 31;
@@ -1175,6 +1190,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             {
                 h = _value[i];
                 j = 0x00000001;
+
                 for (k = 0; k < 16; k++)
                 {
                     if ((h & 0x01) != 0)
@@ -1279,8 +1295,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             int i;
             int h;
             bool result = false;
+
             if (_length != B._length)
-                throw new Exception();
+                throw new Exception("Length mismatch, invalid vector!");
             
             for (i = 0; i < _blocks; i++)
             {
@@ -1845,6 +1862,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         {
             _blocks += 1;
             _length += 32;
+
             if (_blocks <= _value.Length)
             {
                 int i;
@@ -1869,6 +1887,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         {
             int j = Math.Min(K, _blocks - K);
             GF2Polynomial result = new GF2Polynomial(j << 5);
+
             if (_blocks >= K)
                 Array.Copy(_value, K, result._value, 0, j);
             

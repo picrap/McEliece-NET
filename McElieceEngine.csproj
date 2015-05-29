@@ -8,7 +8,7 @@
     <ProjectGuid>{2E993A0E-BA63-464E-A5C5-FC7C42AA2F78}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece</RootNamespace>
+    <RootNamespace>VTDev.Libraries.CEXEngine</RootNamespace>
     <AssemblyName>McElieceEngine</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

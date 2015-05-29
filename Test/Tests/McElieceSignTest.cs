@@ -59,7 +59,7 @@ namespace Test.Tests
         #region Private Methods
         private void TestSign()
         {
-            MPKCParameters mpar = new MPKCParameters(10, 50);
+            MPKCParameters mpar = MPKCParamSets.MPKCFM11T40S256;
             MPKCKeyGenerator mkgen = new MPKCKeyGenerator(mpar);
             IAsymmetricKeyPair akp = mkgen.GenerateKeyPair();
 
@@ -68,7 +68,7 @@ namespace Test.Tests
                 sgn.Initialize(akp);
 
                 int sz = sgn.MaxPlainText - 1;
-                byte[] data = new byte[320];
+                byte[] data = new byte[200];
                 new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPRng().GetBytes(data);
 
                 byte[] code = sgn.Sign(data, 0, data.Length);

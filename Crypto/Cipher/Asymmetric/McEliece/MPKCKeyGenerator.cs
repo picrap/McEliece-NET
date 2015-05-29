@@ -75,12 +75,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
             // finite field GF(2^m)
             GF2mField field = new GF2mField(_M, _fieldPoly); 
             // irreducible Goppa polynomial
-            PolynomialGF2mSmallM gp = new PolynomialGF2mSmallM(field, _T, PolynomialGF2mSmallM.RANDOM_IRREDUCIBLE_POLYNOMIAL, _secRnd);//1s
+            PolynomialGF2mSmallM gp = new PolynomialGF2mSmallM(field, _T, PolynomialGF2mSmallM.RANDOM_IRREDUCIBLE_POLYNOMIAL, _secRnd);
             PolynomialRingGF2m ring = new PolynomialRingGF2m(field, gp);
             // matrix for computing square roots in (GF(2^m))^t
             PolynomialGF2mSmallM[] qInv = ring.SquareRootMatrix;
             // generate canonical check matrix
-            GF2Matrix h = GoppaCode.CreateCanonicalCheckMatrix(field, gp);//err here, higher T?
+            GF2Matrix h = GoppaCode.CreateCanonicalCheckMatrix(field, gp);
             // compute short systematic form of check matrix
             GoppaCode.MaMaPe mmp = GoppaCode.ComputeSystematicForm(h, _secRnd);
             GF2Matrix shortH = mmp.SecondMatrix;
@@ -89,7 +89,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
             GF2Matrix shortG = (GF2Matrix)shortH.ComputeTranspose();
             // obtain number of rows of G (= dimension of the code)
             int k = shortG.RowCount;
-
             // generate keys
             IAsymmetricKey pubKey = new MPKCPublicKey(OID, _N, _T, shortG);
             IAsymmetricKey privKey = new MPKCPrivateKey(OID, _N, k, field, gp, p, h, qInv);

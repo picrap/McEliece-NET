@@ -18,6 +18,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
     /// MPKCParameters encParams = new MPKCParameters(11, 40, McElieceCiphers.Fujisaki);
     /// MPKCKeyGenerator keyGen = new MPKCKeyGenerator(encParams);
     /// IAsymmetricKeyPair keyPair = keyGen.GenerateKeyPair();
+    /// 
     /// byte[] data = new byte[100];
     /// byte[] enc, dec;
     /// 
@@ -80,7 +81,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         {
             get 
             {
-                if (_maxCipherText == 0)
+                if (_maxCipherText == 0 || !_isInitialized)
                     throw new MPKCException("The cipher must be initialized before size can be calculated!");
 
                 return _maxCipherText; 
@@ -94,7 +95,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         {
             get 
             {
-                if (_maxPlainText == 0)
+                if (_maxPlainText == 0 || !_isInitialized)
                     throw new MPKCException("The cipher must be initialized before size can be calculated!");
 
                 return _maxPlainText; 
@@ -185,7 +186,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         public void Initialize(bool Encryption, IAsymmetricKeyPair KeyPair)
         {
             if (!(KeyPair is MPKCKeyPair))
-                throw new MPKCException("Not a valid McEliece key pair");
+                throw new MPKCException("Not a valid McEliece key pair!");
 
             // init implementation engine
             _encEngine.Initialize(Encryption, KeyPair);

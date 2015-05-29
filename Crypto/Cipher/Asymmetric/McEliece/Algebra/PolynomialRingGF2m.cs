@@ -1,5 +1,7 @@
 ﻿#region Directives
 using System;
+using VTDev.Libraries.CEXEngine.Utility;
+using System.Threading.Tasks;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
@@ -68,19 +70,42 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         {
             int numColumns = _poly.Degree;
             _sqMatrix = new PolynomialGF2mSmallM[numColumns];
+            PolynomialGF2mSmallM[] _sqMatrix2 = new PolynomialGF2mSmallM[numColumns];
 
-            for (int i = 0; i < numColumns >> 1; i++)
+            if (ParallelUtils.IsParallel)
             {
-                int[] monomCoeffs = new int[(i << 1) + 1];
-                monomCoeffs[i << 1] = 1;
-                _sqMatrix[i] = new PolynomialGF2mSmallM(_field, monomCoeffs);
+                int nct = numColumns >> 1;
+                Parallel.For(0, nct, i =>
+                {
+                    int[] monomCoeffs = new int[(i << 1) + 1];
+                    monomCoeffs[i << 1] = 1;
+                    _sqMatrix[i] = new PolynomialGF2mSmallM(_field, monomCoeffs);
+                });
+
+                Parallel.For(nct, numColumns, i =>
+                {
+                    int[] monomCoeffs = new int[(i << 1) + 1];
+                    monomCoeffs[i << 1] = 1;
+                    PolynomialGF2mSmallM monomial = new PolynomialGF2mSmallM(_field, monomCoeffs);
+                    _sqMatrix[i] = monomial.Mod(_poly);
+                });
             }
-            for (int i = numColumns >> 1; i < numColumns; i++)
+            else
             {
-                int[] monomCoeffs = new int[(i << 1) + 1];
-                monomCoeffs[i << 1] = 1;
-                PolynomialGF2mSmallM monomial = new PolynomialGF2mSmallM(_field, monomCoeffs);
-                _sqMatrix[i] = monomial.Mod(_poly);
+                for (int i = 0; i < numColumns >> 1; i++)
+                {
+                    int[] monomCoeffs = new int[(i << 1) + 1];
+                    monomCoeffs[i << 1] = 1;
+                    _sqMatrix[i] = new PolynomialGF2mSmallM(_field, monomCoeffs);
+                }
+
+                for (int i = numColumns >> 1; i < numColumns; i++)
+                {
+                    int[] monomCoeffs = new int[(i << 1) + 1];
+                    monomCoeffs[i << 1] = 1;
+                    PolynomialGF2mSmallM monomial = new PolynomialGF2mSmallM(_field, monomCoeffs);
+                    _sqMatrix[i] = monomial.Mod(_poly);
+                }
             }
         }
 
@@ -133,18 +158,40 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                 tmpMatrix[i].MultThisWithElement(invCoef);
                 _sqRootMatrix[i].MultThisWithElement(invCoef);
 
-                // normalize all other columns
-                for (int j = 0; j < numColumns; j++)
+                if (ParallelUtils.IsParallel)
                 {
-                    if (j != i)
+                    // normalize all other columns
+                    Parallel.For(0, numColumns, j =>
                     {
-                        coef = tmpMatrix[j].GetCoefficient(i);
-                        if (coef != 0)
+                        if (j != i)
                         {
-                            PolynomialGF2mSmallM tmpSqColumn = tmpMatrix[i].MultWithElement(coef);
-                            PolynomialGF2mSmallM tmpInvColumn = _sqRootMatrix[i].MultWithElement(coef);
-                            tmpMatrix[j].AddToThis(tmpSqColumn);
-                            _sqRootMatrix[j].AddToThis(tmpInvColumn);
+                            int coefp = tmpMatrix[j].GetCoefficient(i);
+                            if (coefp != 0)
+                            {
+                                PolynomialGF2mSmallM tmpSqColumn = tmpMatrix[i].MultWithElement(coefp);
+                                PolynomialGF2mSmallM tmpInvColumn = _sqRootMatrix[i].MultWithElement(coefp);
+                                tmpMatrix[j].AddToThis(tmpSqColumn);
+                                lock (_sqRootMatrix)
+                                    _sqRootMatrix[j].AddToThis(tmpInvColumn);
+                            }
+                        }
+                    });
+                }
+                else
+                {
+                    for (int j = 0; j < numColumns; j++)
+                    {
+                        if (j != i)
+                        {
+                            coef = tmpMatrix[j].GetCoefficient(i);
+                            if (coef != 0)
+                            {
+                                PolynomialGF2mSmallM tmpSqColumn = tmpMatrix[i].MultWithElement(coef);
+                                PolynomialGF2mSmallM tmpInvColumn = _sqRootMatrix[i].MultWithElement(coef);
+                                tmpMatrix[j].AddToThis(tmpSqColumn);
+                                lock (_sqRootMatrix)
+                                    _sqRootMatrix[j].AddToThis(tmpInvColumn);
+                            }
                         }
                     }
                 }

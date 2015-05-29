@@ -49,7 +49,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             while (P != 0)
             {
                 result++;
-                P = IntUtils.URShift(P, 1);
+                P >>= 1;
             }
 
             return result;
@@ -68,7 +68,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             while (P != 0)
             {
                 result++;
-                P = IntUtils.URShift(P, 1);
+                P >>= 1;
             }
 
             return result - 1;

@@ -44,7 +44,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             if (!IsPermutation(Perm))
                 throw new ArgumentException("Permutation: Array is not a permutation vector!");
 
-            this._perm = IntUtils.Clone(Perm);
+            this._perm = IntUtils.DeepCopy(Perm);
         }
         
         /// <summary>
@@ -148,7 +148,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <returns>The permutation vector</returns>
         public int[] GetVector()
         {
-            return IntUtils.Clone(_perm);
+            return IntUtils.DeepCopy(_perm);
         }
 
         /// <summary>

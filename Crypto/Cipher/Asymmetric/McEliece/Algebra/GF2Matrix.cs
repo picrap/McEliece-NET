@@ -5,6 +5,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Numeric;
 using VTDev.Libraries.CEXEngine.Tools;
 using VTDev.Libraries.CEXEngine.Utility;
+using System.Threading.Tasks;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
@@ -76,7 +77,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// 
         /// <param name="Columns">The number of columns</param>
         /// <param name="Matrix">The element array</param>
-        public GF2Matrix(int Columns, int[][] Matrix)
+        public GF2Matrix(int Columns, int[][] Matrix) //f1
         {
             if (Matrix[0].Length != (Columns + 31) >> 5)
                 throw new ArithmeticException("Int array does not match given number of columns!");
@@ -157,7 +158,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             _matrix = new int[A._matrix.Length][];
 
             for (int i = 0; i < _matrix.Length; i++)
-                _matrix[i] = IntUtils.Clone(A._matrix[i]);
+                _matrix[i] = IntUtils.DeepCopy(A._matrix[i]);
         }
 
         /// <summary>
@@ -200,8 +201,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
 
             for (int i = 0; i < RowCount; i++)
             {
-                for (int j = 0; j < _length; j++)
-                    _matrix[i][j] = 0;
+                Array.Clear(_matrix[i], 0, _length);
+                //for (int j = 0; j < _length; j++)
+                //    _matrix[i][j] = 0;
             }
         }
 
@@ -216,6 +218,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             ColumnCount = N;
             _length = IntUtils.URShift((N + 31), 5);
             _matrix = ArrayUtils.CreateJagged<int[][]>(RowCount, _length);
+
             for (int i = 0; i < RowCount; i++)
             {
                 for (int j = 0; j < _length; j++)
@@ -251,6 +254,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                     _matrix[i][j] = SecRnd.Next();
                 
                 _matrix[i][q] = (IntUtils.URShift(SecRnd.Next(), s)) | r;
+
                 for (int j = q + 1; j < _length; j++)
                     _matrix[i][j] = 0;
             }
@@ -283,10 +287,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                 int r = i & 0x1f;
                 int s = r;
                 r = 1 << r;
+
                 for (int j = 0; j < q; j++)
                     _matrix[i][j] = 0;
                 
                 _matrix[i][q] = (SecRnd.Next() << s) | r;
+
                 for (int j = q + 1; j < _length; j++)
                     _matrix[i][j] = SecRnd.Next();
                 
@@ -357,15 +363,35 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
 
             for (int i = 0; i < RowCount; i++)
             {
-                for (int j = 0; j < ColumnCount; j++)
+                if (ParallelUtils.IsParallel)
                 {
-                    int qs = IntUtils.URShift(j, 5);
-                    int rs = j & 0x1f;
-                    int b = (IntUtils.URShift(_matrix[i][qs], rs)) & 1;
-                    int qt = IntUtils.URShift(i, 5);
-                    int rt = i & 0x1f;
-                    if (b == 1)
-                        result[j][qt] |= 1 << rt;
+                    // normalize all other columns
+                    Parallel.For(0, ColumnCount, j =>
+                    {
+                        int qs = IntUtils.URShift(j, 5);
+                        int rs = j & 0x1f;
+                        int b = (IntUtils.URShift(_matrix[i][qs], rs)) & 1;
+                        int qt = IntUtils.URShift(i, 5);
+                        int rt = i & 0x1f;
+                        if (b == 1)
+                        {
+                            lock (result)
+                                result[j][qt] |= 1 << rt;
+                        }
+                    });
+                }
+                else
+                {
+                    for (int j = 0; j < ColumnCount; j++)
+                    {
+                        int qs = IntUtils.URShift(j, 5);
+                        int rs = j & 0x1f;
+                        int b = (IntUtils.URShift(_matrix[i][qs], rs)) & 1;
+                        int qt = IntUtils.URShift(i, 5);
+                        int rt = i & 0x1f;
+                        if (b == 1)
+                            result[j][qt] |= 1 << rt;
+                    }
                 }
             }
 
@@ -568,7 +594,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             int[][] result = new int[RowCount][];
 
             for (int i = RowCount - 1; i >= 0; i--)
-                result[i] = IntUtils.Clone(_matrix[pVec[i]]);
+                result[i] = IntUtils.DeepCopy(_matrix[pVec[i]]);
 
             return new GF2Matrix(RowCount, result);
         }
@@ -807,7 +833,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             // clone this matrix
             int[][] tmpMatrix = ArrayUtils.CreateJagged<int[][]>(RowCount, _length);
             for (int i = RowCount - 1; i >= 0; i--)
-                tmpMatrix[i] = IntUtils.Clone(_matrix[i]);
+                tmpMatrix[i] = IntUtils.DeepCopy(_matrix[i]);
 
             // initialize inverse matrix as unit matrix
             int[][] invMatrix = ArrayUtils.CreateJagged<int[][]>(RowCount, _length);
@@ -1068,7 +1094,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <param name="P">The permutation</param>
         /// 
         /// <returns>Returns GF2Matrix <c>this*P</c></returns>
-        public override Matrix RightMultiply(Permutation P)
+        public override Matrix RightMultiply(Permutation P)//3
         {
 
             int[] pVec = P.GetVector();

@@ -33,7 +33,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// </summary>
         public int[] IntArrayForm
         {
-            get { return IntUtils.Clone(_vector); }
+            get { return IntUtils.DeepCopy(_vector); }
         }
         #endregion
 
@@ -89,7 +89,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                 if (!Field.IsElementOfThisField(Vector[i]))
                     throw new ArithmeticException("Element array is not specified over the given finite field.");
             }
-            _vector = IntUtils.Clone(Vector);
+            _vector = IntUtils.DeepCopy(Vector);
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         {
             _field = new GF2mField(GF._field);
             Length = GF.Length;
-            _vector = IntUtils.Clone(GF._vector);
+            _vector = IntUtils.DeepCopy(GF._vector);
         }
         #endregion
 

@@ -120,7 +120,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             if (V.Length != size)
                 throw new ArithmeticException("GF2Vector: length mismatch!");
 
-            this._elements = IntUtils.Clone(V);
+            this._elements = IntUtils.DeepCopy(V);
 
             int r = Length & 0x1f;
 
@@ -137,7 +137,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         public GF2Vector(GF2Vector G)
         {
             this.Length = G.Length;
-            this._elements = IntUtils.Clone(G._elements);
+            this._elements = IntUtils.DeepCopy(G._elements);
         }
 
         /// <summary>
@@ -376,7 +376,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             if (Length != otherVec.Length)
                 throw new ArithmeticException("GF2Vector: Length mismatch!");
 
-            int[] vec = IntUtils.Clone(((GF2Vector)V)._elements);
+            int[] vec = IntUtils.DeepCopy(((GF2Vector)V)._elements);
 
             for (int i = vec.Length - 1; i >= 0; i--)
                 vec[i] ^= _elements[i];

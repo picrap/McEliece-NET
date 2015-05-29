@@ -336,6 +336,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                     gDegree = g.Degree;
                 }
                 while ((hDegree == 0) || (hDegree == gDegree));
+
                 // 2.6 If 2deg(h) > deg(g) then set g(t) <- g(t)/h(t) ...
                 if ((hDegree << 1) > gDegree)
                     g = g.Quotient(h);

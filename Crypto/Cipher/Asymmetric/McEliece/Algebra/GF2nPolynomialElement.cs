@@ -131,6 +131,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             GF2Polynomial h;
             int j;
             u.ReduceN();
+
             while (!u.IsOne())
             {
                 u.ReduceN();
@@ -147,6 +148,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                     j = -j;
                     c.ReduceN(); // this increases the performance
                 }
+
                 u.ShiftLeftAddThis(v, j);
                 b.ShiftLeftAddThis(c, j);
             }
@@ -186,13 +188,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                         b.ShiftRightThis();
                     }
                 }
+
                 if (u.IsOne())
-                {
-                    return new GF2nPolynomialElement((GF2nPolynomialField)mField,
-                        b);
-                }
+                    return new GF2nPolynomialElement((GF2nPolynomialField)mField, b);
+                
                 u.ReduceN();
                 v.ReduceN();
+
                 if (u.Length < v.Length)
                 {
                     h = u;
@@ -202,6 +204,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                     b = c;
                     c = h;
                 }
+
                 u.AddToThis(v);
                 b.AddToThis(c);
             }
@@ -532,7 +535,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         }
 
         /// <summary>
-        /// 
+        /// Increase the element by one
         /// </summary>
         /// 
         /// <returns>Returns <c>this</c> + 'one'</returns>
@@ -583,6 +586,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                 SquareThis();
                 return;
             }
+
             polynomial = polynomial.Multiply(((GF2nPolynomialElement)Factor).polynomial);
             ReduceThis();
         }
@@ -809,7 +813,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                     polynomial.XorBit(i - l);
                     polynomial.XorBit(i - m);
                     polynomial.XorBit(i - mDegree);
-
                 }
             }
 

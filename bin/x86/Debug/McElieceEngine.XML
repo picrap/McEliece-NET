@@ -3253,7 +3253,7 @@
             Initialize this class
             </summary>
             
-            <param name="CipherParams">The cipher parameters</param>
+            <param name="Paramaters">The cipher parameters</param>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCiphers.FujisakiCipher.Finalize">
             <summary>
@@ -3303,20 +3303,6 @@
             
             <returns>Instance of digest</returns>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCiphers.FujisakiCipher.InitEncryption(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCPublicKey)">
-            <summary>
-            Initialize the state for encryption
-            </summary>
-            
-            <param name="PublicKey">The public key</param>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCiphers.FujisakiCipher.InitDecryption(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCPrivateKey)">
-            <summary>
-            Initialize the state for decryption
-            </summary>
-            
-            <param name="PrivateKey">The private key</param>
-        </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCiphers.FujisakiCipher.Dispose">
             <summary>
             Dispose of this class
@@ -3364,6 +3350,7 @@
             MPKCParameters encParams = new MPKCParameters(11, 40, McElieceCiphers.Fujisaki);
             MPKCKeyGenerator keyGen = new MPKCKeyGenerator(encParams);
             IAsymmetricKeyPair keyPair = keyGen.GenerateKeyPair();
+            
             byte[] data = new byte[100];
             byte[] enc, dec;
             
@@ -5427,17 +5414,6 @@
             
             <returns>Equal</returns>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Tools.Compare.AreEqual``1(``0[][],``0[][])">
-            <summary>
-            Compare Integer Arrays
-            </summary>
-            
-            <typeparam name="T">Type of array</typeparam>
-            <param name="A">Array A</param>
-            <param name="B">Array B</param>
-            
-            <returns>Equal</returns>
-        </member>
         <member name="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCPublicKey">
             <summary>
             A McEliece public key
@@ -7173,7 +7149,26 @@
         <member name="T:VTDev.Libraries.CEXEngine.Utility.ParallelUtils">
             <summary>
             This class is a utility class for parallel processing
+            <para>http://blogs.msdn.com/b/pfxteam/archive/2009/08/12/9867246.aspx</para>
             </summary>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Utility.ParallelUtils.Loop(System.Threading.Tasks.ParallelOptions,System.Func{System.Boolean},System.Action{System.Threading.Tasks.ParallelLoopState})">
+            <summary>
+            An infinite parallel loop function
+            </summary>
+            
+            <param name="Options">The parallel options</param>
+            <param name="Condition">The while conditional</param>
+            <param name="Body">The functions body</param>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Utility.ParallelUtils.While(System.Threading.Tasks.ParallelOptions,System.Func{System.Boolean},System.Action{System.Threading.Tasks.ParallelLoopState})">
+            <summary>
+            A parallel While function
+            </summary>
+            
+            <param name="Options">The parallel options</param>
+            <param name="Condition">The while conditional</param>
+            <param name="Body">The functions body</param>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Utility.ParallelUtils.While(System.Func{System.Boolean},System.Action)">
             <summary>
@@ -7542,6 +7537,18 @@
             <para>Security:133?, MaxText:431, K:3448, N:4096, PublicKey Size: 306371, PrivateKey Size:344039</para>
             </summary>
         </member>
+        <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCParamSets.MPKCFM12T67S256">
+            <summary>
+            High security; uses the Fujisaki cipher and SHA-256
+            <para>Security:148?, MaxText:431, K:3292, N:4096, PublicKey Size: 332540, PrivateKey Size:425928</para>
+            </summary>
+        </member>
+        <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCParamSets.MPKCFM13T95S256">
+            <summary>
+            High security; uses the Fujisaki cipher and SHA-256 (slow)
+            <para>Security:190?, MaxText:431, K:3292, N:4096, PublicKey Size: 332540, PrivateKey Size:425928</para>
+            </summary>
+        </member>
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCParamSets.MPKCFM13T29S256">
             <summary>
             Medium security; uses the Fujisaki cipher and SHA-256
@@ -7791,20 +7798,6 @@
             <param name="Engine">Engine type</param>
             
             <returns>Instance of digest</returns>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCiphers.KobaraImaiCipher.InitEncryption(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCPublicKey)">
-            <summary>
-            Initialize the state for encryption
-            </summary>
-            
-            <param name="PublicKey">The public key</param>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCiphers.KobaraImaiCipher.InitDecryption(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCPrivateKey)">
-            <summary>
-            Initialize the state for decryption
-            </summary>
-            
-            <param name="PrivateKey">The private key</param>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCiphers.KobaraImaiCipher.Dispose">
             <summary>
@@ -10984,9 +10977,9 @@
             
             <returns>Returns the number of bits in a number</returns>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Utility.IntUtils.Clone(System.Int32[])">
+        <member name="M:VTDev.Libraries.CEXEngine.Utility.IntUtils.DeepCopy(System.Int32[])">
             <summary>
-            Create a copy of an array
+            Create a deep copy of an array
             </summary>
             <param name="A">The array to copy</param>
             
@@ -12026,7 +12019,7 @@
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2nPolynomialElement.Increase">
             <summary>
-            
+            Increase the element by one
             </summary>
             
             <returns>Returns <c>this</c> + 'one'</returns>
@@ -14225,7 +14218,7 @@
             
             <returns>Returns Gcd(this, f)</returns>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.Gcd(System.Int32[],System.Int32[])">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.Gcd(System.Int32[],System.Int32[],VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2mField)">
             <summary>
             Return the greatest common divisor of two polynomials over the field <c>GF(2^m)</c>
             </summary>
@@ -14351,7 +14344,7 @@
             
             <param name="Element">An element of the finite field GF(2^m)</param>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.MultWithElement(System.Int32[],System.Int32)">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.MultWithElement(System.Int32[],System.Int32,VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2mField)">
             <summary>
             Compute the product of a polynomial a with an element from the finite field <c>GF(2^m)</c>
             </summary>
@@ -14393,7 +14386,7 @@
             
             <returns>Returns a human readable form of the polynomial</returns>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.Add(System.Int32[],System.Int32[])">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.Add(System.Int32[],System.Int32[],VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2mField)">
             <summary>
             Compute the sum of two polynomials a and b over the finite field <c>GF(2^m)</c>
             </summary>
@@ -14427,7 +14420,17 @@
             
             <returns>he generated irreducible polynomial</returns>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.Divide(System.Int32[],System.Int32[])">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.GetRandomElement(VTDev.Libraries.CEXEngine.Crypto.Prng.SecureRandom,VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2mField)">
+            <summary>
+            Get a randome element over degree Gf2
+            </summary>
+            
+            <param name="SecRnd">The source of randomness</param>
+            <param name="GFM">The Gf2 field</param>
+            
+            <returns>A random element</returns>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.Divide(System.Int32[],System.Int32[],VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2mField)">
             <summary>
             Compute the result of the division of two polynomials over the field <c>GF(2^m)</c>
             </summary>
@@ -14456,7 +14459,7 @@
             
             <returns>Returns the head coefficient of <c>A</c></returns>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.IsIrreducible(System.Int32[])">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.IsIrreducible(System.Int32[],VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2mField)">
             <summary>
             Check a polynomial for irreducibility over the field <c>GF(2^m)</c>
             </summary>
@@ -14465,7 +14468,7 @@
             
             <returns>Returns true if a is irreducible, false otherwise</returns>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.Mod(System.Int32[],System.Int32[])">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.Mod(System.Int32[],System.Int32[],VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2mField)">
             <summary>
             Reduce a polynomial modulo another polynomial
             </summary>
@@ -14475,7 +14478,7 @@
             
             <returns>Returns <c>a mod f</c></returns>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.ModDiv(System.Int32[],System.Int32[],System.Int32[])">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.ModDiv(System.Int32[],System.Int32[],System.Int32[],VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2mField)">
             <summary>
             Compute the result of the division of two polynomials modulo a third polynomial over the field <c>GF(2^m)</c>
             </summary>
@@ -14486,7 +14489,7 @@
             
             <returns>Returns <c>a * b^(-1) mod g</c></returns>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.ModMultiply(System.Int32[],System.Int32[],System.Int32[])">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.ModMultiply(System.Int32[],System.Int32[],System.Int32[],VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2mField)">
             <summary>
             Compute the product of two polynomials modulo a third polynomial over the finite field <c>GF(2^m)</c>
             </summary>
@@ -14497,7 +14500,7 @@
             
             <returns>Returns <c>a * b mod g</c></returns>
         </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.Multiply(System.Int32[],System.Int32[])">
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.PolynomialGF2mSmallM.Multiply(System.Int32[],System.Int32[],VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra.GF2mField)">
             <summary>
             Compute the product of two polynomials over the field <c>GF(2^m)</c> using a Karatzuba like multiplication
             </summary>

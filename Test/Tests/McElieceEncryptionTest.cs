@@ -62,7 +62,7 @@ namespace Test.Tests
         #region Private Methods
         private void TestKey()
         {
-            MPKCParameters encParams = new MPKCParameters(11, 40, McElieceCiphers.Fujisaki);
+            MPKCParameters encParams = MPKCParamSets.MPKCFM11T40S256;
             MPKCKeyGenerator keyGen = new MPKCKeyGenerator(encParams);
             IAsymmetricKeyPair keyPair = keyGen.GenerateKeyPair();
             byte[] enc, dec, data;
@@ -90,7 +90,7 @@ namespace Test.Tests
 
         private void TestEncrypt()
         {
-            MPKCParameters mpar = new MPKCParameters(11, 40, McElieceCiphers.Fujisaki);
+            MPKCParameters mpar = MPKCParamSets.MPKCFM11T40S256;
             MPKCKeyGenerator mkgen = new MPKCKeyGenerator(mpar);
             IAsymmetricKeyPair akp = mkgen.GenerateKeyPair();
             byte[] enc;
@@ -117,7 +117,6 @@ namespace Test.Tests
             // KobaraLmai
             using (MPKCEncrypt mpe = new MPKCEncrypt(mpar))
             {
-                mpar = new MPKCParameters(11, 40, McElieceCiphers.KobaraImai);
                 mpe.Initialize(true, akp);
 
                 int sz = mpe.MaxPlainText;
@@ -137,7 +136,6 @@ namespace Test.Tests
             // Pointcheval
             using (MPKCEncrypt mpe = new MPKCEncrypt(mpar))
             {
-                mpar = new MPKCParameters(11, 40, McElieceCiphers.Pointcheval);
                 mpe.Initialize(true, akp);
 
                 int sz = mpe.MaxPlainText;

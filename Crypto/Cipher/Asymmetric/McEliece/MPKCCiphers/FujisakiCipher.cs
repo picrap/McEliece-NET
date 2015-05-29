@@ -37,6 +37,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
         private int _K;
         private int _N;
         private int _T;
+        private MPKCParameters _cipherParams;
         #endregion
 
         #region Properties
@@ -54,10 +55,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
         /// Initialize this class
         /// </summary>
         /// 
-        /// <param name="CipherParams">The cipher parameters</param>
-        public FujisakiCipher(MPKCParameters CipherParams)
+        /// <param name="Paramaters">The cipher parameters</param>
+        public FujisakiCipher(MPKCParameters Paramaters)
         {
-            _dgtEngine = GetDigest(CipherParams.Digest);
+            _cipherParams = Paramaters;
+            _dgtEngine = GetDigest(Paramaters.Digest);
         }
 
         /// <summary>
@@ -96,7 +98,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
 
             byte[] mBytes;
             // get PRNG object..
-            using (KDF2Drbg sr0 = new KDF2Drbg(new Keccak256()))
+            using (KDF2Drbg sr0 = new KDF2Drbg(GetDigest(_cipherParams.Digest)))
             {
                 // seed PRNG with r'
                 sr0.Initialize(rBytes);
@@ -153,7 +155,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
             byte[] c2;
 
             // get PRNG object
-            using (KDF2Drbg sr0 = new KDF2Drbg(new Keccak256()))
+            using (KDF2Drbg sr0 = new KDF2Drbg(GetDigest(_cipherParams.Digest)))
             {
                 // seed PRNG with r'
                 sr0.Initialize(rBytes);
@@ -200,12 +202,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
             if (_isEncryption)
             {
                 _secRnd = new SecureRandom();
-                InitEncryption((MPKCPublicKey)KeyPair.PublicKey);
+                _N = ((MPKCPublicKey)KeyPair.PublicKey).N;
+                _K = ((MPKCPublicKey)KeyPair.PublicKey).K;
+                _T = ((MPKCPublicKey)KeyPair.PublicKey).T;
                 _maxPlainText = (((MPKCPublicKey)KeyPair.PublicKey).K >> 3);
             }
             else
             {
-                InitDecryption((MPKCPrivateKey)KeyPair.PrivateKey);
+                _N = ((MPKCPrivateKey)KeyPair.PrivateKey).N;
+                _K = ((MPKCPrivateKey)KeyPair.PrivateKey).K;
+                _T = ((MPKCPrivateKey)KeyPair.PrivateKey).T;
             }
         }
         #endregion
@@ -239,29 +245,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
                 default:
                     return new SHA512();
             }
-        }
-
-        /// <summary>
-        /// Initialize the state for encryption
-        /// </summary>
-        /// 
-        /// <param name="PublicKey">The public key</param>
-        private void InitEncryption(MPKCPublicKey PublicKey)
-        {
-            _N = PublicKey.N;
-            _K = PublicKey.K;
-            _T = PublicKey.T;
-        }
-
-        /// <summary>
-        /// Initialize the state for decryption
-        /// </summary>
-        /// 
-        /// <param name="PrivateKey">The private key</param>
-        private void InitDecryption(MPKCPrivateKey PrivateKey)
-        {
-            _N = PrivateKey.N;
-            _T = PrivateKey.T;
         }
         #endregion
 

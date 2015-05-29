@@ -103,16 +103,15 @@ namespace VTDev.Libraries.CEXEngine.Utility
         }
 
         /// <summary>
-        /// Create a copy of an array
+        /// Create a deep copy of an array
         /// </summary>
         /// <param name="A">The array to copy</param>
         /// 
         /// <returns>Returns the array copy</returns>
-        public static int[] Clone(int[] A)
+        public static int[] DeepCopy(int[] A)
         {
             int[] result = new int[A.Length];
             Array.Copy(A, 0, result, 0, A.Length);
-
             return result;
         }
 

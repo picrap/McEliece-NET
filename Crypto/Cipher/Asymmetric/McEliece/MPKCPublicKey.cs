@@ -121,12 +121,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <para>The array can contain only the public key.</para>
         /// </summary>
         /// 
-        /// <param name="Key">The byte array containing the key</param>
+        /// <param name="KeyArray">The byte array containing the key</param>
         /// 
         /// <returns>An initialized MPKCPublicKey class</returns>
-        public static MPKCPublicKey Read(byte[] Key)
+        public static MPKCPublicKey From(byte[] KeyArray)
         {
-            return Read(new MemoryStream(Key));// ToDo: offset/length? for stream?
+            return From(new MemoryStream(KeyArray));// ToDo: offset/length? for stream?
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <param name="KeyStream">The byte array containing the key</param>
         /// 
         /// <returns>An initialized MPKCPublicKey class</returns>
-        public static MPKCPublicKey Read(Stream KeyStream)
+        public static MPKCPublicKey From(Stream KeyStream)
         {
             try
             {

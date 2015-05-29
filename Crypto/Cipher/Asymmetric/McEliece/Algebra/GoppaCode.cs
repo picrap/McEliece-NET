@@ -4,6 +4,8 @@ using VTDev.Libraries.CEXEngine.Numeric;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Utility;
 using System.Threading.Tasks;
+using VTDev.Libraries.CEXEngine.Tools;
+using System.Threading;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
@@ -143,9 +145,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             // create matrix YZ
             int[][] yz = ArrayUtils.CreateJagged<int[][]>(t, n);
 
-            // here j is used as index and as element of field GF(2^m)
-            for (int j = 0; j < n; j++)
-                yz[0][j] = Field.Inverse(Gp.EvaluateAt(j));
+            if (ParallelUtils.IsParallel)
+            {
+                Parallel.For(0, n, j =>
+                    yz[0][j] = Field.Inverse(Gp.EvaluateAt(j)));
+            }
+            else
+            {
+                // here j is used as index and as element of field GF(2^m)
+                for (int j = 0; j < n; j++)
+                    yz[0][j] = Field.Inverse(Gp.EvaluateAt(j));
+            }
 
             for (int i = 1; i < t; i++)
             {
@@ -164,7 +174,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                 }
             }
 
-            // create matrix H = XYZ -slow
+            // create matrix H = XYZ 
             for (int i = 0; i < t; i++)
             {
                 if (ParallelUtils.IsParallel)
@@ -188,20 +198,44 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             // convert to matrix over GF(2)
             int[][] result = ArrayUtils.CreateJagged<int[][]>(t * m, IntUtils.URShift((n + 31), 5));
 
-            for (int j = 0; j < n; j++)
+            if (ParallelUtils.IsParallel)
             {
-                int q = IntUtils.URShift(j, 5);
-                int r = 1 << (j & 0x1f);
-                for (int i = 0; i < t; i++)
+                for (int j = 0; j < n; j++)
                 {
-                    int e = hArray[i][j];
-                    for (int u = 0; u < m; u++)
+                    int q = IntUtils.URShift(j, 5);
+                    int r = 1 << (j & 0x1f);
+                    for (int i = 0; i < t; i++)
                     {
-                        int b = (IntUtils.URShift(e, u)) & 1;
-                        if (b != 0)
+                        int e = hArray[i][j];
+                        Parallel.For(0, m, u =>
                         {
-                            int ind = (i + 1) * m - u - 1;
-                            result[ind][q] ^= r;
+                            int b = (IntUtils.URShift(e, u)) & 1;
+                            if (b != 0)
+                            {
+                                int ind = (i + 1) * m - u - 1;
+                                result[ind][q] ^= r;
+                            }
+                        });
+                    }
+                }
+            }
+            else
+            {
+                for (int j = 0; j < n; j++)
+                {
+                    int q = IntUtils.URShift(j, 5);
+                    int r = 1 << (j & 0x1f);
+                    for (int i = 0; i < t; i++)
+                    {
+                        int e = hArray[i][j];
+                        for (int u = 0; u < m; u++)
+                        {
+                            int b = (IntUtils.URShift(e, u)) & 1;
+                            if (b != 0)
+                            {
+                                int ind = (i + 1) * m - u - 1;
+                                result[ind][q] ^= r;
+                            }
                         }
                     }
                 }
@@ -221,19 +255,47 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <returns>Returns the tuple <c>(S^-1, M, P)</c></returns>
         public static MaMaPe ComputeSystematicForm(GF2Matrix H, SecureRandom SecRnd)
         {
-            int n = H.ColumnCount;
-            GF2Matrix hp, sInv;
-            GF2Matrix s = null;
-            Permutation p;
+            MaMaPe mmp = null;
+            object lockobj = new object();
 
-            do
+            if (ParallelUtils.IsParallel)//not checked
             {
-                p = new Permutation(n, SecRnd);
-                hp = (GF2Matrix)H.RightMultiply(p);
-                sInv = hp.LeftSubMatrix();
-                s = InvertMatrix(sInv);
+                Func<bool> condFn = () => mmp == null;
+                ParallelUtils.Loop(new ParallelOptions(), condFn, loopState =>
+                {
+                    MaMaPe mmp2 = GetMMP(H, SecRnd);
+                    
+                    if (mmp2 != null)
+                    {
+                        lock (mmp2)
+                        {
+                            mmp = mmp2;
+                        }
+                    }
+                });
             }
-            while (s == null);
+            else
+            {
+                do
+                {
+                    mmp = GetMMP(H, SecRnd);
+                }
+                while (mmp == null);
+            }
+
+            return mmp;
+        }
+
+        private static MaMaPe GetMMP(GF2Matrix H, SecureRandom SecRnd)
+        {
+            int n = H.ColumnCount;
+            GF2Matrix s = null;
+            Permutation p = new Permutation(n, SecRnd);
+            GF2Matrix hp = (GF2Matrix)H.RightMultiply(p);
+            GF2Matrix sInv = hp.LeftSubMatrix();
+
+            if ((s = InvertMatrix(sInv)) == null)
+                return null;
 
             GF2Matrix shp = (GF2Matrix)s.RightMultiply(hp);
             GF2Matrix m = shp.RightSubMatrix();
