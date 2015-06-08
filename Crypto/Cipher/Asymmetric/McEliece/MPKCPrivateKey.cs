@@ -11,10 +11,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
     /// <summary>
     /// A McEliece private key
     /// </summary>
-    public class MPKCPrivateKey : IAsymmetricKey, ICloneable, IDisposable
+    public sealed class MPKCPrivateKey : IAsymmetricKey, ICloneable, IDisposable
     {
         #region Constants
-        private const int OID_LENGTH = 32;
         private const int GF_LENGTH = 4;
         #endregion
 
@@ -22,7 +21,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         private GF2mField _gField;
         private PolynomialGF2mSmallM _goppaPoly;
         private bool _isDisposed = false;
-        private byte[] _Oid;
         private GF2Matrix _H;
         private int _K;
         private int _N;
@@ -72,14 +70,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         }
 
         /// <summary>
-        /// Get: Returns the 3 byte OID of the algorithm
-        /// </summary>
-        public byte[] OID
-        {
-            get { return _Oid; }
-        }
-
-        /// <summary>
         /// Get: Returns the permutation used to generate the systematic check matrix
         /// </summary>
         internal Permutation P1
@@ -109,7 +99,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// Initialize this class for CCA2 MPKCS
         /// </summary>
         /// 
-        /// <param name="Oid">OID of the algorithm</param>
         /// <param name="N">Length of the code</param>
         /// <param name="K">The dimension of the code</param>
         /// <param name="Gf">The finite field <c>GF(2^m)</c></param>
@@ -117,10 +106,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <param name="P">The permutation</param>
         /// <param name="H">The canonical check matrix</param>
         /// <param name="QInv">The matrix used to compute square roots in <c>(GF(2^m))^t</c></param>
-        internal MPKCPrivateKey(byte[] Oid, int N, int K, GF2mField Gf, PolynomialGF2mSmallM Gp, Permutation P, GF2Matrix H, PolynomialGF2mSmallM[] QInv)
+        internal MPKCPrivateKey(int N, int K, GF2mField Gf, PolynomialGF2mSmallM Gp, Permutation P, GF2Matrix H, PolynomialGF2mSmallM[] QInv)
         {
-            _Oid = new byte[OID_LENGTH];
-            Array.Copy(Oid, _Oid, Math.Min(Oid.Length, OID_LENGTH));
             _N = N;
             _K = K;
             _gField = Gf;
@@ -134,7 +121,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// Initialize this class CCA2 MPKCS using encoded byte arrays
         /// </summary>
         /// 
-        /// <param name="Oid">OID of the algorithm</param>
         /// <param name="N">Length of the code</param>
         /// <param name="K">The dimension of the code</param>
         /// <param name="Gf">Encoded field polynomial defining the finite field <c>GF(2^m)</c></param>
@@ -142,10 +128,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <param name="P">The encoded permutation</param>
         /// <param name="H">Encoded canonical check matrix</param>
         /// <param name="QInv">The encoded matrix used to compute square roots in <c>(GF(2^m))^t</c></param>
-        public MPKCPrivateKey(byte[] Oid, int N, int K, byte[] Gf, byte[] Gp, byte[] P, byte[] H, byte[][] QInv)
+        public MPKCPrivateKey(int N, int K, byte[] Gf, byte[] Gp, byte[] P, byte[] H, byte[][] QInv)
         {
-            _Oid = new byte[OID_LENGTH];
-            Array.Copy(Oid, _Oid, Math.Min(Oid.Length, OID_LENGTH));
             _N = N;
             _K = K;
             _gField = new GF2mField(Gf);
@@ -156,6 +140,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
 
             for (int i = 0; i < QInv.Length; i++)
                 _qInv[i] = new PolynomialGF2mSmallM(_gField, QInv[i]);
+        }
+
+        private MPKCPrivateKey()
+        {
         }
 
         /// <summary>
@@ -196,8 +184,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
                 int len;
 
                 BinaryReader reader = new BinaryReader(KeyStream);
-                // get oid
-                byte[] oid = reader.ReadBytes(OID_LENGTH);
                 // length
                 int n = reader.ReadInt32();
                 // dimension
@@ -224,7 +210,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
                     qi[i] = reader.ReadBytes(len);
                 }
 
-                return new MPKCPrivateKey(oid, n, k, gf, gp, p1, h, qi);
+                return new MPKCPrivateKey(n, k, gf, gp, p1, h, qi);
             }
             catch
             {
@@ -240,8 +226,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         public byte[] ToBytes()
         {
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
-            // oid
-            writer.Write(OID);
             // length
             writer.Write(N);
             // dimension
@@ -346,11 +330,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
 
             MPKCPrivateKey key = (MPKCPrivateKey)Obj;
 
-            for (int i = 0; i < OID.Length; i++)
-            {
-                if (key.OID[i] != OID[i])
-                    return false;
-            }
 
             if (!N.Equals(key.N))
                 return false;
@@ -389,9 +368,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
             hash += GP.GetHashCode() * 31;
             hash += P1.GetHashCode() * 31;
 
-            for (int i = 0; i < OID.Length; i++)
-                hash += OID[i] * 31;
-
             return hash;
         }
         #endregion
@@ -404,7 +380,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <returns>MPKCPublicKey copy</returns>
         public object Clone()
         {
-            return new MPKCPrivateKey(_Oid, _N, _K, _gField, _goppaPoly, _P1, _H, _qInv);
+            return new MPKCPrivateKey(_N, _K, _gField, _goppaPoly, _P1, _H, _qInv);
         }
         #endregion
 
@@ -424,11 +400,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
             {
                 try
                 {
-                    if (_Oid != null)
-                    {
-                        Array.Clear(_Oid, 0, _Oid.Length);
-                        _Oid = null;
-                    }
                     if (_gField != null)
                     {
                         _gField.Clear();

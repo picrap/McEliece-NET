@@ -11,16 +11,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
     /// <summary>
     /// A McEliece public key
     /// </summary>
-    public class MPKCPublicKey : IAsymmetricKey, ICloneable, IDisposable
+    public sealed class MPKCPublicKey : IAsymmetricKey, ICloneable, IDisposable
     {
-        #region Constants
-        private const int OID_LENGTH = 32;
-        #endregion
-
         #region Fields
         private bool _isDisposed = false;
-        // the OID of the algorithm
-        private byte[] _Oid;
         // the length of the code
         private int _N;
         // the error correction capability of the code
@@ -55,14 +49,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         }
 
         /// <summary>
-        /// Get: Returns the Oid string
-        /// </summary>
-        public byte[] OID
-        {
-            get { return _Oid; }
-        }
-
-        /// <summary>
         /// Get: Returns the dimension of the code
         /// </summary>
         public int K
@@ -76,14 +62,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// Initialize this class
         /// </summary>
         /// 
-        /// <param name="Oid">The 32 byte identifier</param>
         /// <param name="N">The length of the code</param>
         /// <param name="T">The error correction capability of the code</param>
         /// <param name="G">The generator matrix</param>
-        internal MPKCPublicKey(byte[] Oid, int N, int T, GF2Matrix G)
+        internal MPKCPublicKey(int N, int T, GF2Matrix G)
         {
-            _Oid = new byte[OID_LENGTH];
-            Array.Copy(Oid, _Oid, Math.Min(Oid.Length, OID_LENGTH));
             _N = N;
             _T = T;
             _G = new GF2Matrix(G);
@@ -93,17 +76,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// Constructor used by McElieceKeyFactory
         /// </summary>
         /// 
-        /// <param name="Oid">The 32 byte identifier</param>
         /// <param name="T">The error correction capability of the code</param>
         /// <param name="N">The length of the code</param>
         /// <param name="G">The encoded generator matrix</param>
-        public MPKCPublicKey(byte[] Oid, int T, int N, byte[] G)
+        public MPKCPublicKey(int T, int N, byte[] G)
         {
-            _Oid = new byte[OID_LENGTH];
-            Array.Copy(Oid, _Oid, Math.Min(Oid.Length, OID_LENGTH));
             _N = N;
             _T = T;
             _G = new GF2Matrix(G);
+        }
+
+        private MPKCPublicKey()
+        {
         }
 
         /// <summary>
@@ -143,11 +127,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
             {
                 KeyStream.Seek(0, SeekOrigin.Begin);
                 BinaryReader reader = new BinaryReader(KeyStream);
-                byte[] oid = reader.ReadBytes(OID_LENGTH);
                 int n = reader.ReadInt32();
                 int t = reader.ReadInt32();
                 byte[] encG = reader.ReadBytes((int)(reader.BaseStream.Length - reader.BaseStream.Position));
-                MPKCPublicKey pubKey = new MPKCPublicKey(oid, t, n, encG);
+                MPKCPublicKey pubKey = new MPKCPublicKey(t, n, encG);
 
                 return pubKey;
             }
@@ -165,7 +148,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         public byte[] ToBytes()
         {
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
-            writer.Write(OID);
             writer.Write(N);
             writer.Write(T);
             writer.Write(G.GetEncoded());
@@ -242,11 +224,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
             if (Obj == null || !(Obj is MPKCPublicKey))
                 return false;
             MPKCPublicKey key = (MPKCPublicKey)Obj;
-            for (int i = 0; i < OID.Length; i++)
-            {
-                if (key.OID[i] != OID[i])
-                    return false;
-            }
+
             if (N != key.N)
                 return false;
             if (T != key.T)
@@ -267,8 +245,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
             int code = 0;
             code += N * 31;
             code += T * 31;
-            for (int i = 0; i < OID.Length; i++)
-                code += OID[i];
+            code += G.GetHashCode();
 
             return code;
         }
@@ -282,7 +259,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <returns>MPKCPublicKey copy</returns>
         public object Clone()
         {
-            return new MPKCPublicKey(_Oid, _T, _N, _G);
+            return new MPKCPublicKey(_T, _N, _G);
         }
         #endregion
 
@@ -302,11 +279,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
             {
                 try
                 {
-                    if (_Oid != null)
-                    {
-                        Array.Clear(_Oid, 0, _Oid.Length);
-                        _Oid = null;
-                    }
                     if (_G != null)
                     {
                         _G.Clear();

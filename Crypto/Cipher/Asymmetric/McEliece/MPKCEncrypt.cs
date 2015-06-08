@@ -63,7 +63,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
     /// <item><description>Inspired by the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> versions McEliece implementation.</description></item>
     /// </list> 
     /// </remarks>
-    public class MPKCEncrypt : IAsymmetricCipher, IDisposable
+    public sealed class MPKCEncrypt : IAsymmetricCipher, IDisposable
     {
         #region Fields
         private IMPKCCiphers _encEngine;
@@ -112,6 +112,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         public MPKCEncrypt(MPKCParameters CipherParams)
         {
             _encEngine = GetEngine(CipherParams);
+        }
+
+        private MPKCEncrypt()
+        {
         }
 
         /// <summary>

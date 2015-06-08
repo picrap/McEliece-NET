@@ -60,6 +60,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
             else
                 throw new MPKCException("Not a valid McEliece key!");
         }
+
+        private MPKCKeyPair()
+        {
+        }
         #endregion
     }
 }

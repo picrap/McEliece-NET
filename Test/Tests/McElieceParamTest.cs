@@ -35,7 +35,7 @@ namespace Test.Tests
 
         #region Public Methods
         /// <summary>
-        /// Tests the validity of the EncryptionKey implementation
+        /// Tests the validity of the McEliece implementation
         /// </summary>
         /// 
         /// <returns>State</returns>

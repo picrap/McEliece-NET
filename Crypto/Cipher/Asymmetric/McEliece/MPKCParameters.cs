@@ -54,7 +54,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
     /// <item><description>Inspired by the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> versions McEliece implementation.</description></item>
     /// </list> 
     /// </remarks>
-    public class MPKCParameters : IAsymmetricParameters, ICloneable, IDisposable
+    public sealed class MPKCParameters : IAsymmetricParameters, ICloneable, IDisposable
     {
         #region Constants
         /// <summary>
@@ -273,6 +273,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
                 _fieldPoly = FieldPoly;
             else
                 throw new ArgumentException("Polynomial is not a field polynomial for GF(2^m)");
+        }
+
+        private MPKCParameters()
+        {
         }
 
         /// <summary>

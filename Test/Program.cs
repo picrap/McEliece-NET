@@ -1,15 +1,14 @@
 ﻿using System;
 using Test.Tests;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
-using VTDev.Libraries.CEXEngine.Crypto;
-using VTDev.Libraries.CEXEngine.Crypto.Prng;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece;
 using VTDev.Libraries.CEXEngine.Tools;
 
 namespace Test
 {
     static class Program
     {
+        #region Main
         static void Main(string[] args)
         {
             ConsoleUtils.SizeConsole(80, 60);
@@ -78,11 +77,12 @@ namespace Test
         {
             Console.WriteLine(e.Message);
         }
+        #endregion
 
         #region Loop Test
         static void CycleTest()
         {
-            MPKCParameters mpar = MPKCParamSets.MPKCFM12T41S256; //MPKCFM11T40S256 MPKCFM12T41S256
+            MPKCParameters mpar = MPKCParamSets.MPKCFM12T41S256;
             MPKCKeyGenerator mkgen = new MPKCKeyGenerator(mpar);
             IAsymmetricKeyPair akp = mkgen.GenerateKeyPair();
             byte[] enc;
@@ -94,10 +94,7 @@ namespace Test
 
                 int sz = mpe.MaxPlainText;
                 byte[] data = new byte[sz];
-                new CSPRng().GetBytes(data);
-
                 enc = mpe.Encrypt(data);
-
                 mpe.Initialize(false, akp);
                 byte[] dec = mpe.Decrypt(enc);
 
@@ -106,7 +103,7 @@ namespace Test
             }/**/
         }
 
-        static void EncryptionLoop(int Iterations = 100)
+        static void EncryptionSpeed(int Iterations = 100)
         {
             Console.WriteLine(string.Format("******Looping Encryption Test: Testing {0} Iterations******", Iterations));
             Console.WriteLine("Test cycle generates keys, encrypts, decrypts and verifies success.");
@@ -116,7 +113,7 @@ namespace Test
             for (int i = 0; i < Iterations; i++)
             {
                 // gen keys, encrypt, decrypt and verify
-                string tm = SpeedTest(CycleTest, 1);
+                string tm = TimeAction(CycleTest, 1);
                 Console.WriteLine(string.Format("Passed Iteration {0} in {1} ms.", i + 1, tm));
             }
 
@@ -124,43 +121,27 @@ namespace Test
             Console.WriteLine("Completed! Press any key to continuue..");
             Console.ReadKey();
         }
-
-        static string SpeedTest(Action Test, int Iterations = 1)
-        {
-            // output results to a label to test compiled times..
-            string ft = @"m\:ss\.ff";
-            System.Diagnostics.Stopwatch runTimer = new System.Diagnostics.Stopwatch();
-
-            runTimer.Start();
-
-            for (int i = 0; i < Iterations; i++)
-                Test();
-
-            runTimer.Stop();
-
-            return TimeSpan.FromMilliseconds(runTimer.Elapsed.TotalMilliseconds).ToString(ft);
-        }
         #endregion
 
         #region Timing Test
-        static void SpeedTest(int Iterations)
+        static void KeyGenSpeed(int Iterations = 1)
         {
             Console.WriteLine(string.Format("M/T/Security: Key creation average time over {0} passes:", Iterations));
-            Console.WriteLine("11/40/95:  " + Speed(new Action(TM1140), Iterations));
-            Console.WriteLine("11/48/98:  " + Speed(new Action(TM1148), Iterations));
-            Console.WriteLine("12/31/108: " + Speed(new Action(TM1231), Iterations));
-            Console.WriteLine("12/41/129: " + Speed(new Action(TM1241), Iterations));
-            Console.WriteLine("12/48/138: " + Speed(new Action(TM1248), Iterations));
-            Console.WriteLine("12/54/133: " + Speed(new Action(TM1254), Iterations));
-            Console.WriteLine("13/29/128: " + Speed(new Action(TM1329), Iterations));
-            Console.WriteLine("13/44/136: " + Speed(new Action(TM1344), Iterations));
-            Console.WriteLine("14/24/115: " + Speed(new Action(TM1424), Iterations));
+            Console.WriteLine("11/40/95:  " + TimeAction(new Action(TM1140), Iterations));
+            Console.WriteLine("11/48/98:  " + TimeAction(new Action(TM1148), Iterations));
+            Console.WriteLine("12/31/108: " + TimeAction(new Action(TM1231), Iterations));
+            Console.WriteLine("12/41/129: " + TimeAction(new Action(TM1241), Iterations));
+            Console.WriteLine("12/48/138: " + TimeAction(new Action(TM1248), Iterations));
+            Console.WriteLine("12/54/133: " + TimeAction(new Action(TM1254), Iterations));
+            Console.WriteLine("13/29/128: " + TimeAction(new Action(TM1329), Iterations));
+            Console.WriteLine("13/44/136: " + TimeAction(new Action(TM1344), Iterations));
+            Console.WriteLine("14/24/115: " + TimeAction(new Action(TM1424), Iterations));
             Console.WriteLine("");
 
             Console.ReadKey();
         }
 
-        private static string Speed(Action Test, int Iterations = 1)
+        private static string TimeAction(Action Test, int Iterations = 1)
         {
             // output results to a label to test compiled times..
             string ft = @"m\:ss\.ff";

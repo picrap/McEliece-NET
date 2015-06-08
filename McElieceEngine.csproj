@@ -76,6 +76,7 @@
     <Compile Include="Crypto\Cipher\Asymmetric\McEliece\MPKCCiphers\IMPKCCiphers.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\McEliece\MPKCParamSets.cs" />
     <Compile Include="Numeric\BigEndian.cs" />
+    <Compile Include="Utility\ArrayEx.cs" />
     <Compile Include="Utility\BigIntUtils.cs" />
     <Compile Include="Utility\ByteUtils.cs" />
     <Compile Include="Utility\CharUtils.cs" />

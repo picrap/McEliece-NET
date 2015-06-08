@@ -64,7 +64,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
     /// <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
     /// </list> 
     /// </remarks>
-    public class MPKCSign : IDisposable
+    public sealed class MPKCSign : IDisposable
     {
         #region Fields
         private IMPKCCiphers _asyCipher;
@@ -104,6 +104,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         {
             _dgtEngine = GetDigest(CipherParams.Digest);
             _asyCipher = GetEngine(CipherParams);
+        }
+
+        private MPKCSign()
+        {
         }
 
         /// <summary>

@@ -34,10 +34,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
     /// <item><description>Then, the algorithm computes the k x n matrix G = SG'P.</description></item>
     /// </list> 
     /// </remarks>
-    public class MPKCKeyGenerator
+    public sealed class MPKCKeyGenerator
     {
         #region Fields
-        private static readonly byte[] OID = System.Text.Encoding.ASCII.GetBytes("1.3.6.1.4.1.8301.3.1.3.4.1");
         private MPKCParameters _mcElieceParams;
         private int _M;
         private int _N;
@@ -61,6 +60,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
             _N = _mcElieceParams.N;
             _T = _mcElieceParams.T;
             _fieldPoly = _mcElieceParams.FieldPolynomial;
+        }
+
+        private MPKCKeyGenerator()
+        {
         }
         #endregion
 
@@ -90,8 +93,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
             // obtain number of rows of G (= dimension of the code)
             int k = shortG.RowCount;
             // generate keys
-            IAsymmetricKey pubKey = new MPKCPublicKey(OID, _N, _T, shortG);
-            IAsymmetricKey privKey = new MPKCPrivateKey(OID, _N, k, field, gp, p, h, qInv);
+            IAsymmetricKey pubKey = new MPKCPublicKey(_N, _T, shortG);
+            IAsymmetricKey privKey = new MPKCPrivateKey(_N, k, field, gp, p, h, qInv);
 
             // return key pair
             return new MPKCKeyPair(pubKey, privKey);            
