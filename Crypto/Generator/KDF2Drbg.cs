@@ -24,18 +24,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// </example>
     /// 
     /// <revisionHistory>
-    ///     <revision date="2015/28/15" version="1.3.1.1">Initial release</revision>
+    ///     <revision date="2015/28/15" version="1.3.1.1" author="John Underhill">Initial release</revision>
     /// </revisionHistory>
     /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Mac.HMAC">VTDev.Libraries.CEXEngine.Crypto.Mac.HMAC HMAC</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest">VTDev.Libraries.CEXEngine.Crypto.Digest Namespace</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto">VTDev.Libraries.CEXEngine.Crypto Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Mac.HMAC">VTDev.Libraries.CEXEngine.Crypto.Mac HMAC</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest IDigest Interface</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digests">VTDev.Libraries.CEXEngine.Crypto Digests Enumeration</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
     /// <list type="bullet">
-    /// <item><description>Can be initialized with a <see cref="Digests">Digest</see> or a Mac.</description></item>
+    /// <item><description>Can be initialized with a <see cref="Digests">Digest</see> or a <see cref="Macs">Mac</see>.</description></item>
     /// <item><description>The <see cref="HKDF(IDigest, bool)">Constructors</see> DisposeEngine parameter determines if Digest engine is destroyed when <see cref="Dispose()"/> is called on this class; default is <c>true</c>.</description></item>
     /// <item><description>Salt size should be multiple of Digest block size.</description></item>
     /// <item><description>Ikm size should be Digest hash return size.</description></item>
@@ -43,15 +42,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     /// </list>
     /// 
     /// <description><h4>Guiding Publications:</h4></description>
-    /// <list type="bullet">
+    /// <list type="table">
     /// <item><description>ISO-18033-2: <see href="http://www.shoup.net/iso/std6.pdf">Specification</see>.</description></item>
     /// <item><description>RFC 2898: <see href="http://tools.ietf.org/html/rfc2898">Specification</see>.</description></item>
     /// </list>
-    /// 
-    /// <description><h4>Code Base Guides:</h4></description>
-    /// <list type="table">
-    /// <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
-    /// </list> 
     /// </remarks>
     public class KDF2Drbg : IGenerator, IDisposable
     {
@@ -129,7 +123,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
             _hashLength = Digest.DigestSize;
             _keySize = Digest.BlockSize;
         }
-        
+
         /// <summary>
         /// Finalize objects
         /// </summary>
@@ -144,7 +138,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// Initialize the generator
         /// </summary>
         /// 
-        /// <param name="Salt">Salt value</param>
+        /// <param name="Salt">Salt or 'password' value</param>
         /// 
         /// <exception cref="System.ArgumentNullException">Thrown if a null Salt is used</exception>
         public void Initialize(byte[] Salt)
@@ -174,7 +168,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// Initialize the generator
         /// </summary>
         /// 
-        /// <param name="Salt">Salt value</param>
+        /// <param name="Salt">Salt or 'password' value</param>
         /// <param name="Ikm">Key material</param>
         /// 
         /// <exception cref="System.ArgumentNullException">Thrown if a null Salt or Ikm is used</exception>
@@ -189,7 +183,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 
             _Salt = (byte[])Salt.Clone();
             _IV = (byte[])Ikm.Clone();
-            
+
             _isInitialized = true;
         }
 
@@ -197,7 +191,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         /// Initialize the generator
         /// </summary>
         /// 
-        /// <param name="Salt">Salt value</param>
+        /// <param name="Salt">Salt or 'password' value</param>
         /// <param name="Ikm">Key material</param>
         /// <param name="Nonce">Nonce value</param>
         /// 
@@ -220,7 +214,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         }
 
         /// <summary>
-        /// Generate a block of cryptographically secure pseudo random bytes
+        /// Generate a block of pseudo random bytes
         /// </summary>
         /// 
         /// <param name="Output">Output array filled with random bytes</param>
@@ -232,7 +226,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         }
 
         /// <summary>
-        /// Generate cryptographically secure pseudo random bytes
+        /// Generate pseudo random bytes
         /// </summary>
         /// 
         /// <param name="Output">Output array filled with random bytes</param>
@@ -243,7 +237,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         public int Generate(byte[] Output, int OutOffset, int Size)
         {
             if ((Output.Length - Size) < OutOffset)
-				throw new Exception("Output buffer too small");
+                throw new Exception("Output buffer too small");
 
             return GenerateKey(Output, OutOffset, Size);
         }
@@ -261,46 +255,46 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         }
         #endregion
 
-        #region Helpers
+        #region Private Methods
         private int GenerateKey(byte[] Output, int OutOffset, int Size)
-		{
-			int outLen = _digest.DigestSize;
+        {
+            int outLen = _digest.DigestSize;
             int maxCtr = (int)((Size + outLen - 1) / outLen);
             // only diff between v 1 & 2
-			int counter = 1;
-			byte[] hash = new byte[_digest.DigestSize];
+            int counter = 1;
+            byte[] hash = new byte[_digest.DigestSize];
 
-			for (int i = 0; i < maxCtr; i++)
-			{
+            for (int i = 0; i < maxCtr; i++)
+            {
                 _digest.BlockUpdate(_Salt, 0, _Salt.Length);
-				_digest.Update((byte)(counter >> 24));
-				_digest.Update((byte)(counter >> 16));
-				_digest.Update((byte)(counter >> 8));
-				_digest.Update((byte)counter);
+                _digest.Update((byte)(counter >> 24));
+                _digest.Update((byte)(counter >> 16));
+                _digest.Update((byte)(counter >> 8));
+                _digest.Update((byte)counter);
 
-				if (_IV != null)
+                if (_IV != null)
                     _digest.BlockUpdate(_IV, 0, _IV.Length);
 
-				_digest.DoFinal(hash, 0);
+                _digest.DoFinal(hash, 0);
 
-				if (Size > outLen)
-				{
-					Array.Copy(hash, 0, Output, OutOffset, outLen);
-					OutOffset += outLen;
-					Size -= outLen;
-				}
-				else
-				{
-					Array.Copy(hash, 0, Output, OutOffset, Size);
-				}
+                if (Size > outLen)
+                {
+                    Array.Copy(hash, 0, Output, OutOffset, outLen);
+                    OutOffset += outLen;
+                    Size -= outLen;
+                }
+                else
+                {
+                    Array.Copy(hash, 0, Output, OutOffset, Size);
+                }
 
-				counter++;
-			}
+                counter++;
+            }
 
-			_digest.Reset();
+            _digest.Reset();
 
             return Size;
-		}
+        }
         #endregion
 
         #region IDispose
@@ -335,9 +329,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
                         _Salt = null;
                     }
                 }
-                catch { }
-
-                _isDisposed = true;
+                finally
+                {
+                    _isDisposed = true;
+                }
             }
         }
         #endregion

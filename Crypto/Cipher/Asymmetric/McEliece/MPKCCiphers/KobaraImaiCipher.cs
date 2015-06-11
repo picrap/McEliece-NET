@@ -304,12 +304,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
         /// Get the digest engine
         /// </summary>
         /// 
-        /// <param name="Engine">Engine type</param>
+        /// <param name="Digest">Engine type</param>
         /// 
         /// <returns>Instance of digest</returns>
-        private IDigest GetDigest(Digests Engine)
+        private IDigest GetDigest(Digests Digest)
         {
-            switch (Engine)
+            switch (Digest)
             {
                 case Digests.Blake256:
                     return new Blake256();
@@ -319,14 +319,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
                     return new Keccak256();
                 case Digests.Keccak512:
                     return new Keccak512();
+                case Digests.Keccak1024:
+                    return new Keccak1024();
                 case Digests.SHA256:
                     return new SHA256();
+                case Digests.SHA512:
+                    return new SHA512();
                 case Digests.Skein256:
                     return new Skein256();
                 case Digests.Skein512:
                     return new Skein512();
+                case Digests.Skein1024:
+                    return new Skein1024();
                 default:
-                    return new SHA512();
+                    throw new ArgumentException("The digest type is not supported!");
             }
         }
         #endregion
