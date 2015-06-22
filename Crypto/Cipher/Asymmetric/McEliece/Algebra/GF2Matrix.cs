@@ -99,16 +99,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             _matrix = Matrix;
         }
 
-        /// <summary>
+        /*/// <summary>
         /// Create an nxn matrix of the given type
         /// </summary>
         /// 
         /// <param name="N">The number of rows (and columns)</param>
         /// <param name="MatrixType">The martix type (see <see cref="Matrix"/> for predefined constants)</param>
         public GF2Matrix(int N, char MatrixType) :
-            this(N, MatrixType, new SecureRandom())
+            this(N, MatrixType, new IRandom())
         {
-        }
+        }*/
 
         /// <summary>
         /// Create an nxn matrix of the given type
@@ -117,7 +117,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <param name="N">The matrix size</param>
         /// <param name="MatrixType">The matrix type</param>
         /// <param name="SecRnd">The source of randomness</param>
-        public GF2Matrix(int N, char MatrixType, SecureRandom SecRnd)
+        public GF2Matrix(int N, char MatrixType, IRandom SecRnd)
         {
             if (N <= 0)
                 throw new ArithmeticException("GF2Matrix: Size of matrix is non-positive!");
@@ -237,7 +237,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// 
         /// <param name="N">Number of rows (and columns)</param>
         /// <param name="SecRnd">Source of randomness</param>
-        private void AssignRandomLowerTriangularMatrix(int N, SecureRandom SecRnd)
+        private void AssignRandomLowerTriangularMatrix(int N, IRandom SecRnd)
         {
             RowCount = N;
             ColumnCount = N;
@@ -267,7 +267,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// 
         /// <param name="N">Number of rows (and columns)</param>
         /// <param name="SecRnd">Source of randomness</param>
-        private void AssignRandomUpperTriangularMatrix(int N, SecureRandom SecRnd)
+        private void AssignRandomUpperTriangularMatrix(int N, IRandom SecRnd)
         {
             RowCount = N;
             ColumnCount = N;
@@ -306,7 +306,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// 
         /// <param name="N">Number of rows (and columns)</param>
         /// <param name="SecRnd">Source of randomness</param>
-        private void AssignRandomRegularMatrix(int N, SecureRandom SecRnd)
+        private void AssignRandomRegularMatrix(int N, IRandom SecRnd)
         {
             RowCount = N;
             ColumnCount = N;
@@ -405,7 +405,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <param name="N">Number of rows (and columns)</param>
         /// <param name="SecRnd">Source of randomness</param>
         /// <returns>The created random regular matrix and its inverse</returns>
-        public static GF2Matrix[] CreateRandomRegularMatrixAndItsInverse(int N, SecureRandom SecRnd)
+        public static GF2Matrix[] CreateRandomRegularMatrixAndItsInverse(int N, IRandom SecRnd)
         {
             GF2Matrix[] result = new GF2Matrix[2];
 

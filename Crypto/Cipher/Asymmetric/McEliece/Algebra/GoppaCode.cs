@@ -27,7 +27,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <summary>
         /// This class is a container for two instances of {@link GF2Matrix} and one instance of Permutation. 
         /// <para>It is used to hold the systematic form <c>S*H*P = (Id|M)</c> of the check matrix <c>H</c> as
-        /// returned by GoppaCode.ComputeSystematicForm(GF2Matrix, SecureRandom).</para>
+        /// returned by GoppaCode.ComputeSystematicForm(GF2Matrix, IRandom).</para>
         /// </summary>
         public class MaMaPe
         {
@@ -253,12 +253,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <param name="SecRnd">The source of randomness</param>
         /// 
         /// <returns>Returns the tuple <c>(S^-1, M, P)</c></returns>
-        public static MaMaPe ComputeSystematicForm(GF2Matrix H, SecureRandom SecRnd)
+        public static MaMaPe ComputeSystematicForm(GF2Matrix H, IRandom SecRnd)
         {
             MaMaPe mmp = null;
             object lockobj = new object();
 
-            if (ParallelUtils.IsParallel)//not checked
+            if (ParallelUtils.IsParallel)
             {
                 Func<bool> condFn = () => mmp == null;
                 ParallelUtils.Loop(new ParallelOptions(), condFn, loopState =>
@@ -286,7 +286,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             return mmp;
         }
 
-        private static MaMaPe GetMMP(GF2Matrix H, SecureRandom SecRnd)
+        private static MaMaPe GetMMP(GF2Matrix H, IRandom SecRnd)
         {
             int n = H.ColumnCount;
             GF2Matrix s = null;

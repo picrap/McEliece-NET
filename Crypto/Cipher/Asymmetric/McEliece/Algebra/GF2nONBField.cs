@@ -29,6 +29,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         private int _mType;
         // holds the multiplication matrix
         public int[][] MultM;
+        private IRandom _secRand;
         #endregion
 
         #region Constructor
@@ -37,11 +38,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// </summary>
         /// 
         /// <param name="Degree">The extention degree of this field</param>
-        public GF2nONBField(int Degree)
+        public GF2nONBField(int Degree, IRandom SecRand)
         {
             if (Degree < 3)
                 throw new ArgumentException("k must be at least 3");
 
+            _secRand = SecRand;
             DegreeN = Degree;
             _mLength = DegreeN / MAXLONG;
             _mBit = DegreeN & (MAXLONG - 1);
@@ -204,7 +206,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
                 do
                 {
                     // 2.1 choose random u (element of) GF(2^m)
-                    u = new GF2nONBElement(this, new SecureRandom());
+                    u = new GF2nONBElement(this, _secRand);
                     ut = new GF2nPolynomial(2, GF2nONBElement.Zero(this));
                     // 2.2 Set c(t) <- ut
                     ut.Set(1, u);

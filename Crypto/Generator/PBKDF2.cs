@@ -151,6 +151,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         {
             if (Salt == null)
                 throw new ArgumentNullException("Salt can not be null!");
+            //if (Salt.Length < _digest.BlockSize)
+            //    throw new ArgumentException("Salt can not be less than digest blocksize!");
 
             if (Salt.Length < _digest.BlockSize * 2)
             {

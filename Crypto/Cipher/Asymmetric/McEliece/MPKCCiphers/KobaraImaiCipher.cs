@@ -35,7 +35,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
         private IAsymmetricKeyPair _keyPair;
         private int _maxPlainText;
         private IDigest _dgtEngine;
-        private SecureRandom _secRnd;
+        private IRandom _secRnd;
         private int _K;
         private int _N;
         private int _T;
@@ -284,7 +284,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
 
             if (_isEncryption)
             {
-                _secRnd = new SecureRandom();
+                _secRnd = GetPrng(_cipherParams.RandomEngine);
                 _N = ((MPKCPublicKey)KeyPair.PublicKey).N;
                 _K = ((MPKCPublicKey)KeyPair.PublicKey).K;
                 _T = ((MPKCPublicKey)KeyPair.PublicKey).T;
@@ -333,6 +333,38 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.MPKCCipher
                     return new Skein1024();
                 default:
                     throw new ArgumentException("The digest type is not supported!");
+            }
+        }
+
+        /// <summary>
+        /// Get the cipher engine
+        /// </summary>
+        /// 
+        /// <param name="Prng">The Prng</param>
+        /// 
+        /// <returns>An initialized prng</returns>
+        private IRandom GetPrng(Prngs Prng)
+        {
+            switch (Prng)
+            {
+                case Prngs.CTRPrng:
+                    return new CTRPrng();
+                case Prngs.DGCPrng:
+                    return new DGCPrng();
+                case Prngs.CSPRng:
+                    return new CSPRng();
+                case Prngs.BBSG:
+                    return new BBSG();
+                case Prngs.CCG:
+                    return new CCG();
+                case Prngs.MODEXPG:
+                    return new MODEXPG();
+                case Prngs.QCG1:
+                    return new QCG1();
+                case Prngs.QCG2:
+                    return new QCG2();
+                default:
+                    throw new ArgumentException("The Prng type is not supported!");
             }
         }
         #endregion

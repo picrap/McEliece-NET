@@ -54,7 +54,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
     /// <item><description>Inspired by the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> versions McEliece implementation.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class MPKCParameters : IAsymmetricParameters, ICloneable, IDisposable
+    public sealed class MPKCParameters : IAsymmetricParameters
     {
         #region Constants
         /// <summary>
@@ -76,23 +76,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         private int _fieldPoly;
         private bool _isDisposed = false;
         private Digests _dgtEngine = Digests.SHA256;
-        private McElieceCiphers _encEngine = McElieceCiphers.Pointcheval;
+        private Prngs _rndEngine = Prngs.CTRPrng;
+        private McElieceCiphers _cca2Engine = McElieceCiphers.Pointcheval;
         #endregion
 
         #region Properties
         /// <summary>
         /// The digest engine used to power CCA2 variants
         /// </summary>
+        /// 
+        /// <exception cref="MPKCException">Thrown if an invalid digest is specified</exception>
         public Digests Digest
         {
             get { return _dgtEngine; }
             private set
             {
-                if (value != Digests.Blake256 &&
-                    value != Digests.Keccak256 &&
-                    value != Digests.SHA256 &&
-                    value != Digests.Skein256)
-                    throw new MPKCException("Only 256 bit Digests are supported!");
+                if (value == Digests.Keccak1024 || value == Digests.Skein1024)
+                    throw new MPKCException("MPKCParameters:Digest", "Only 512 and 256 bit Digests are supported!", new ArgumentException());
 
                 _dgtEngine = value;
             }
@@ -101,10 +101,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <summary>
         /// The cipher engine used for encryption
         /// </summary>
-        public McElieceCiphers Engine
+        public McElieceCiphers CCA2Engine
         {
-            get { return _encEngine; }
-            private set { _encEngine = value; }
+            get { return _cca2Engine; }
+            private set { _cca2Engine = value; }
         }
 
         /// <summary>
@@ -123,18 +123,31 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
             get { return _N; }
         }
 
+
         /// <summary>
-        /// Get: Three bytes that uniquely identify the parameter set
+        /// The cipher Prng
         /// </summary>
+        public Prngs RandomEngine
+        {
+            get { return _rndEngine; }
+            private set { _rndEngine = value; }
+        }
+
+        /// <summary>
+        /// Get: Three b
+        /// ytes that uniquely identify the parameter set
+        /// </summary>
+        /// 
+        /// <exception cref="MPKCException">Thrown if an invalid OId is specified</exception>
         public byte[] OId
         {
             get { return _oId; }
             private set
             {
                 if (value == null)
-                    throw new MPKCException("Oid can not be null!");
+                    throw new MPKCException("MPKCParameters:OId", "Oid can not be null!", new ArgumentNullException());
                 if (value.Length != 3)
-                    throw new MPKCException("Oid must be 3 bytes in length!");
+                    throw new MPKCException("MPKCParameters:OId", "Oid must be 3 bytes in length!", new ArgumentException());
 
                 _oId = value;
             }
@@ -163,13 +176,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// </summary>
         /// 
         /// <param name="OId">Three bytes that uniquely identify the parameter set</param>
-        /// <param name="Engine">The McEliece CCA2 cipher engine</param>
+        /// <param name="CCA2Engine">The McEliece CCA2 cipher engine</param>
         /// <param name="Digest">The digest used by the cipher engine</param>
-        public MPKCParameters(byte[] OId, McElieceCiphers Engine = McElieceCiphers.Fujisaki, Digests Digest = Digests.SHA256) :
+        /// <param name="Prng">The prng used by the cipher engine</param>
+        public MPKCParameters(byte[] OId, McElieceCiphers CCA2Engine = McElieceCiphers.Fujisaki, Digests Digest = Digests.SHA256, Prngs Prng = Prngs.CTRPrng) :
             this(DEFAULT_M, DEFAULT_T, OId)
         {
             this.Digest = Digest;
-            this.Engine = Engine;
+            this.CCA2Engine = CCA2Engine;
+            this.RandomEngine = Prng;
         }
 
 
@@ -179,17 +194,20 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// 
         /// <param name="Keysize">The length of a Goppa code</param>
         /// <param name="OId">Three bytes that uniquely identify the parameter set</param>
-        /// <param name="Engine">The McEliece CCA2 cipher engine</param>
+        /// <param name="CCA2Engine">The McEliece CCA2 cipher engine</param>
         /// <param name="Digest">The digest used by the cipher engine</param>
+        /// <param name="Prng">The Prng used by the cipher</param>
         /// 
-        /// <exception cref="System.ArgumentException">Thrown if <c>keysize &lt; 1</c></exception>
-        public MPKCParameters(int Keysize, byte[] OId, McElieceCiphers Engine = McElieceCiphers.Fujisaki, Digests Digest = Digests.SHA256)
+        /// <exception cref="MPKCException">Thrown if <c>keysize &lt; 1</c></exception>
+        public MPKCParameters(int Keysize, byte[] OId, McElieceCiphers CCA2Engine = McElieceCiphers.Fujisaki, Digests Digest = Digests.SHA256, Prngs Prng = Prngs.CTRPrng)
         {
             if (Keysize < 1)
-                throw new ArgumentException("key size must be positive!");
+                throw new MPKCException("MPKCParameters:Ctor", "The key size must be positive!", new ArgumentException());
 
             this.Digest = Digest;
-            this.Engine = Engine;
+            this.CCA2Engine = CCA2Engine;
+            this.RandomEngine = Prng;
+
             Array.Copy(OId, this.OId, Math.Min(OId.Length, 3));
             _M = 0;
             _N = 1;
@@ -212,27 +230,30 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <param name="M">The degree of the finite field GF(2^m)</param>
         /// <param name="T">The error correction capability of the code</param>
         /// <param name="OId">Three bytes that uniquely identify the parameter set</param>
-        /// <param name="Engine">The McEliece CCA2 cipher engine</param>
+        /// <param name="CCA2Engine">The McEliece CCA2 cipher engine</param>
         /// <param name="Digest">The digest used by the cipher engine</param>
+        /// <param name="Prng">The Prng used by the cipher</param>
         /// 
-        /// <exception cref="System.ArgumentException">Thrown if; <c>m &lt; 1</c>, <c>m &gt; 32</c>, <c>t &lt; 0</c> or <c>t &gt; n</c></exception>
-        public MPKCParameters(int M, int T, byte[] OId, McElieceCiphers Engine = McElieceCiphers.Fujisaki, Digests Digest = Digests.SHA256)
+        /// <exception cref="MPKCException">Thrown if; <c>m &lt; 1</c>, <c>m &gt; 32</c>, <c>t &lt; 0</c> or <c>t &gt; n</c></exception>
+        public MPKCParameters(int M, int T, byte[] OId, McElieceCiphers CCA2Engine = McElieceCiphers.Fujisaki, Digests Digest = Digests.SHA256, Prngs Prng = Prngs.CTRPrng)
         {
             if (M < 1)
-                throw new ArgumentException("M must be positive!");
+                throw new MPKCException("MPKCParameters:Ctor", "M must be positive!", new ArgumentException());
             if (M > 32)
-                throw new ArgumentException("M is too large!");
+                throw new MPKCException("MPKCParameters:Ctor", "M is too large!", new ArgumentOutOfRangeException());
 
             this.Digest = Digest;
-            this.Engine = Engine;
+            this.CCA2Engine = CCA2Engine;
+            this.RandomEngine = Prng;
+
             Array.Copy(OId, this.OId, Math.Min(OId.Length, 3));
             _M = M;
             _N = 1 << M;
 
             if (T < 0)
-                throw new ArgumentException("T must be positive!");
+                throw new MPKCException("MPKCParameters:Ctor", "T must be positive!", new ArgumentException());
             if (T > N)
-                throw new ArgumentException("T must be less than n = 2^m!");
+                throw new MPKCException("MPKCParameters:Ctor", "T must be less than n = 2^m!", new ArgumentOutOfRangeException());
 
             _T = T;
             _fieldPoly = PolynomialRingGF2.GetIrreduciblePolynomial(M);
@@ -246,33 +267,36 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <param name="T">The error correction capability of the code</param>
         /// <param name="FieldPoly">The field polynomial</param>
         /// <param name="OId">Three bytes that uniquely identify the parameter set</param>
-        /// <param name="Engine">The McEliece CCA2 cipher engine</param>
+        /// <param name="CCA2Engine">The McEliece CCA2 cipher engine</param>
         /// <param name="Digest">The digest used by the cipher engine</param>
+        /// <param name="Prng">The Prng used by the cipher</param>
         /// 
-        /// <exception cref="System.ArgumentException">Thrown if; <c>t &lt; 0</c>, <c>t &gt; n</c>, or <c>poly</c> is not an irreducible field polynomial</exception>
-        public MPKCParameters(int M, int T, int FieldPoly, byte[] OId, McElieceCiphers Engine = McElieceCiphers.Fujisaki, Digests Digest = Digests.SHA256)
+        /// <exception cref="MPKCException">Thrown if; <c>t &lt; 0</c>, <c>t &gt; n</c>, or <c>poly</c> is not an irreducible field polynomial</exception>
+        public MPKCParameters(int M, int T, int FieldPoly, byte[] OId, McElieceCiphers CCA2Engine = McElieceCiphers.Fujisaki, Digests Digest = Digests.SHA256, Prngs Prng = Prngs.CTRPrng)
         {
-            _M = M;
             if (M < 1)
-                throw new ArgumentException("M must be positive");
+                throw new MPKCException("MPKCParameters:Ctor", "M must be positive!", new ArgumentException());
             if (M > 32)
-                throw new ArgumentException("M is too large");
+                throw new MPKCException("MPKCParameters:Ctor", "M is too large!", new ArgumentOutOfRangeException());
 
+            _M = M;
             this.Digest = Digest;
-            this.Engine = Engine;
+            this.CCA2Engine = CCA2Engine;
+            this.RandomEngine = Prng;
+
             Array.Copy(OId, this.OId, Math.Min(OId.Length, 3));
             _N = 1 << M;
             _T = T;
 
             if (T < 0)
-                throw new ArgumentException("T must be positive");
-            if (T > _N)
-                throw new ArgumentException("T must be less than n = 2^m");
+                throw new MPKCException("MPKCParameters:Ctor", "T must be positive!", new ArgumentException());
+            if (T > N)
+                throw new MPKCException("MPKCParameters:Ctor", "T must be less than n = 2^m!", new ArgumentOutOfRangeException());
 
             if ((PolynomialRingGF2.Degree(FieldPoly) == M) && (PolynomialRingGF2.IsIrreducible(FieldPoly)))
                 _fieldPoly = FieldPoly;
             else
-                throw new ArgumentException("Polynomial is not a field polynomial for GF(2^m)");
+                throw new MPKCException("MPKCParameters:Ctor", "Polynomial is not a field polynomial for GF(2^m)", new InvalidDataException());
         }
 
         private MPKCParameters()
@@ -315,12 +339,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
                 BinaryReader reader = new BinaryReader(ParamStream);
                 McElieceCiphers eng = (McElieceCiphers)reader.ReadInt32();
                 Digests dgt = (Digests)reader.ReadInt32();
+                Prngs rnd = (Prngs)reader.ReadInt32();
                 int m = reader.ReadInt32();
                 int t = reader.ReadInt32();
                 int fp = reader.ReadInt32();
                 byte[] oid = reader.ReadBytes(3);
 
-                return new MPKCParameters(m, t, fp, oid, eng, dgt);
+                return new MPKCParameters(m, t, fp, oid, eng, dgt, rnd);
             }
             catch
             {
@@ -336,8 +361,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         public byte[] ToBytes()
         {
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
-            writer.Write((int)Engine);
+            writer.Write((int)CCA2Engine);
             writer.Write((int)Digest);
+            writer.Write((int)RandomEngine);
             writer.Write(M);
             writer.Write(T);
             writer.Write(FieldPolynomial);
@@ -375,11 +401,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// 
         /// <param name="Output">McElieceParameters as a byte array; array must be initialized and of sufficient length</param>
         /// <param name="Offset">The starting position within the Output array</param>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the output array is too small</exception>
         public void WriteTo(byte[] Output, int Offset)
         {
             byte[] data = ToBytes();
             if (Offset + data.Length > Output.Length - Offset)
-                throw new MPKCException("The output array is too small!");
+                throw new MPKCException("MPKCParameters:WriteTo", "The output array is too small!", new ArgumentOutOfRangeException());
 
             Buffer.BlockCopy(data, 0, Output, Offset, data.Length);
         }
@@ -414,7 +442,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
             int result = 1;
 
             result += 31 * (int)Digest;
-            result += 31 * (int)Engine;
+            result += 31 * (int)CCA2Engine;
+            result += 31 * (int)RandomEngine;
             result += 31 * M;
             result += 31 * N;
             result += 31 * T;
@@ -440,7 +469,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
             MPKCParameters other = (MPKCParameters)Obj;
             if (Digest != other.Digest)
                 return false;
-            if (Engine != other.Engine)
+            if (CCA2Engine != other.CCA2Engine)
+                return false;
+            if (RandomEngine != other.RandomEngine)
                 return false;
             if (M != other.M)
                 return false;
@@ -463,7 +494,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <returns>McElieceParameters copy</returns>
         public object Clone()
         {
-            return new MPKCParameters(M, T, FieldPolynomial, _oId, _encEngine, _dgtEngine);
+            return new MPKCParameters(M, T, FieldPolynomial, _oId, _cca2Engine, _dgtEngine, _rndEngine);
         }
         #endregion
 

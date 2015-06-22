@@ -11,7 +11,9 @@ using VTDev.Libraries.CEXEngine.Tools;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
 {
     /// <summary>
-    /// An MPKCS One Time Sign (OTS) message sign and verify implementation
+    /// An MPKCS One Time Sign (OTS) message sign and verify implementation.
+    /// <para>Sign: uses the specified digest to hash a message; the hash value is then encrypted with a McEliece public key.
+    /// Verify: decrypts the McEliece cipher text, and then compares the value to a hash of the message.</para>
     /// </summary>
     /// 
     /// <example>
@@ -78,12 +80,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <summary>
         /// Get: The maximum number of bytes the cipher can decrypt
         /// </summary>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the signer is not initialized</exception>
         public int MaxPlainText
         {
             get 
             { 
                 if (!_isInitialized)
-                    throw new MPKCException("The signer has not been initialized!");
+                    throw new MPKCException("MPKCSign:MaxPlainText", "The signer has not been initialized!", new InvalidOperationException());
 
                 if (_keyPair.PublicKey != null)
                     return ((MPKCPublicKey)_keyPair.PublicKey).K >> 3; 
@@ -125,10 +129,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// </summary>
         /// 
         /// <param name="KeyPair">The <see cref="IAsymmetricKeyPair"/> containing the McEliece public or private key</param>
+        /// 
+        /// <exception cref="MPKCException">Thrown if an invalid keypair is used</exception>
         public void Initialize(IAsymmetricKeyPair KeyPair)
         {
             if (!(KeyPair is MPKCKeyPair))
-                throw new MPKCException("The key pair is not a valid McEliece key pair!");
+                throw new MPKCException("MPKCSign:Initialize", "The key pair is not a valid McEliece key pair!", new InvalidDataException());
 
             Reset();
             _keyPair = KeyPair;
@@ -150,19 +156,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <param name="InputStream">The stream contining the data</param>
         /// 
         /// <returns>The encrypted hash code</returns>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the signer is not initialized or the key is invalid</exception>
         public byte[] Sign(Stream InputStream)
         {
             if (!_isInitialized)
-                throw new MPKCException("The signer has not been initialized!");
+                throw new MPKCException("MPKCSign:Sign", "The signer has not been initialized!", new InvalidOperationException());
             if (_keyPair.PublicKey == null)
-                throw new MPKCException("The public key is invalid!");
+                throw new MPKCException("MPKCSign:Sign", "The public key is invalid!", new InvalidDataException());
             if (!(_keyPair.PublicKey is MPKCPublicKey))
-                throw new MPKCException("The public key is invalid!");
+                throw new MPKCException("MPKCSign:Sign", "The public key is invalid!", new InvalidDataException());
 
             _asyCipher.Initialize(true, _keyPair);
 
             if (_asyCipher.MaxPlainText < _dgtEngine.DigestSize)
-                throw new MPKCException(String.Format("The key size is too small; key supports encrypting up to {0} bytes!", _asyCipher.MaxPlainText));
+                throw new MPKCException("MPKCSign:Sign", string.Format("The key size is too small; key supports encrypting up to {0} bytes!", _asyCipher.MaxPlainText), new ArgumentOutOfRangeException());
 
             byte[] hash = Compute(InputStream);
 
@@ -178,21 +186,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <param name="Length">The number of bytes to process</param>
         /// 
         /// <returns>The encrypted hash code</returns>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the signer is not initialized, the length is out of range, or the key is invalid</exception>
         public byte[] Sign(byte[] Input, int Offset, int Length)
         {
             if (Input.Length - Offset < Length)
-                throw new MPKCException("The input array is too short!");
+                throw new MPKCException("MPKCSign:Sign", "The input array is too short!", new ArgumentOutOfRangeException());
             if (!_isInitialized)
-                throw new MPKCException("The signer has not been initialized!");
+                throw new MPKCException("MPKCSign:Sign", "The signer has not been initialized!", new InvalidOperationException());
             if (_keyPair.PublicKey == null)
-                throw new MPKCException("The public key is invalid!");
+                throw new MPKCException("MPKCSign:Sign", "The public key is invalid!", new InvalidDataException());
             if (!(_keyPair.PublicKey is MPKCPublicKey))
-                throw new MPKCException("The public key is invalid!");
+                throw new MPKCException("MPKCSign:Sign", "The public key is invalid!", new InvalidDataException());
 
             _asyCipher.Initialize(true, _keyPair);
 
             if (_asyCipher.MaxPlainText < _dgtEngine.DigestSize)
-                throw new MPKCException(String.Format("The key size is too small; key supports encrypting up to {0} bytes!", _asyCipher.MaxPlainText));
+                throw new MPKCException("MPKCSign:Sign", string.Format("The key size is too small; key supports encrypting up to {0} bytes!", _asyCipher.MaxPlainText), new ArgumentException());
 
             byte[] hash = Compute(Input, Offset, Length);
 
@@ -207,14 +217,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <param name="Code">The encrypted hash code</param>
         /// 
         /// <returns>Returns <c>true</c> if the codes match</returns>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the signer is not initialized, or the key is invalid</exception>
         public bool Verify(Stream InputStream, byte[] Code)
         {
             if (!_isInitialized)
-                throw new MPKCException("The signer has not been initialized!");
+                throw new MPKCException("MPKCSign:Verify", "The signer has not been initialized!", new InvalidOperationException());
             if (_keyPair.PrivateKey == null)
-                throw new MPKCException("The private key is invalid!");
+                throw new MPKCException("MPKCSign:Verify", "The private key is invalid!", new InvalidDataException());
             if (!(_keyPair.PrivateKey is MPKCPrivateKey))
-                throw new MPKCException("The private key is invalid!");
+                throw new MPKCException("MPKCSign:Verify", "The private key is invalid!", new InvalidDataException());
 
             _asyCipher.Initialize(false, _keyPair);
             byte[] chksum = _asyCipher.Decrypt(Code);
@@ -233,16 +245,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <param name="Code">The encrypted hash code</param>
         /// 
         /// <returns>Returns <c>true</c> if the codes match</returns>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the signer is not initialized, or the key is invalid</exception>
         public bool Verify(byte[] Input, int Offset, int Length, byte[] Code)
         {
             if (Input.Length - Offset < Length)
-                throw new MPKCException("The input array is too short!");
+                throw new MPKCException("MPKCSign:Verify", "The input array is too short!", new ArgumentOutOfRangeException());
             if (!_isInitialized)
-                throw new MPKCException("The signer has not been initialized!");
+                throw new MPKCException("MPKCSign:Verify", "The signer has not been initialized!", new InvalidOperationException());
             if (_keyPair.PrivateKey == null)
-                throw new MPKCException("The private key is invalid!");
+                throw new MPKCException("MPKCSign:Verify", "The private key is invalid!", new InvalidDataException());
             if (!(_keyPair.PrivateKey is MPKCPrivateKey))
-                throw new MPKCException("The private key is invalid!");
+                throw new MPKCException("MPKCSign:Verify", "The private key is invalid!", new InvalidDataException());
 
             _asyCipher.Initialize(false, _keyPair);
             byte[] chksum = _asyCipher.Decrypt(Code);
@@ -338,6 +352,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <param name="Engine">Engine type</param>
         /// 
         /// <returns>Instance of digest</returns>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the digest is unrecognized or unsupported</c></exception>
         private IDigest GetDigest(Digests Engine)
         {
             switch (Engine)
@@ -352,12 +368,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
                     return new Keccak512();
                 case Digests.SHA256:
                     return new SHA256();
+                case Digests.SHA512:
+                    return new SHA512();
                 case Digests.Skein256:
                     return new Skein256();
                 case Digests.Skein512:
                     return new Skein512();
                 default:
-                    return new SHA512();
+                    throw new MPKCException("MPKCSign:GetDigest", "The digest is unrecognized or unsupported!", new ArgumentException());
             }
         }
 
@@ -370,7 +388,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <returns>An initialized cipher</returns>
         private IMPKCCiphers GetEngine(MPKCParameters CipherParams)
         {
-            switch (CipherParams.Engine)
+            switch (CipherParams.CCA2Engine)
             {
                 case McElieceCiphers.KobaraImai:
                     return new KobaraImaiCipher(CipherParams);

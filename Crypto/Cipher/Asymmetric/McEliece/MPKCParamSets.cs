@@ -1,5 +1,6 @@
 ﻿#region Directives
 using VTDev.Libraries.CEXEngine.Exceptions;
+using System;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
@@ -94,15 +95,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// 
         /// <returns>A populated parameter set</returns>
         /// 
-        /// <exception cref="MPKCException">Thrown if an invalid or unknown OId is used.</exception>
+        /// <exception cref="MPKCException">Thrown if an invalid or unknown OId is specified</exception>
         public static MPKCParameters FromId(byte[] OId)
         {
             if (OId == null)
-                throw new MPKCException("OId can not be null!");
+                throw new MPKCException("MPKCParamSets:FromId", "OId can not be null!", new ArgumentException());
             if (OId.Length != 3)
-                throw new MPKCException("OId must be 3 bytes in length!");
+                throw new MPKCException("MPKCParamSets:FromId", "OId must be 3 bytes in length!", new ArgumentException());
             if (OId[0] != 1)
-                throw new MPKCException("OId is not a valid MPKC parameter id!");
+                throw new MPKCException("MPKCParamSets:FromId", "OId is not a valid MPKC parameter id!", new ArgumentException());
 
             if (OId[1] == 1)
             {
@@ -139,7 +140,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
                     return (MPKCParameters)MPKCFM14T24K256.Clone();
             }
 
-            throw new MPKCException("OId does not identify a valid param set!");
+            throw new MPKCException("MPKCParamSets:FromId", "OId does not identify a valid param set!", new ArgumentException());
         }
 
         /// <summary>
@@ -150,7 +151,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// 
         /// <returns>A populated parameter set</returns>
         /// 
-        /// <exception cref="MPKCException">Thrown if an invalid or unknown OId is used.</exception>
+        /// <exception cref="MPKCException">Thrown if an invalid or unknown OId is specified</exception>
         public static MPKCParameters FromName(MPKCParamNames Name)
         {
             switch (Name)
@@ -178,7 +179,47 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
                 case MPKCParamNames.FM14T24K256:
                     return (MPKCParameters)MPKCFM14T24K256.Clone();
                 default:
-                    return (MPKCParameters)MPKCFM12T41S256.Clone();
+                    throw new MPKCException("MPKCParamSets:FromName", "The Parameter Name is not recognized!", new ArgumentException());
+            }
+        }
+
+        /// <summary>
+        /// Retrieve the parameter OId by its enumeration name
+        /// </summary>
+        /// 
+        /// <param name="Name">The enumeration name</param>
+        /// 
+        /// <returns>The 3 byte OId field</returns>
+        /// 
+        /// <exception cref="MPKCException">Thrown if an invalid or unknown OId is specified</exception>
+        public static byte[] GetID(MPKCParamNames Name)
+        {
+            switch (Name)
+            {
+                case MPKCParamNames.FM11T40S256:
+                    return new byte[] { 1, 1, 0 };
+                case MPKCParamNames.FM11T48S256:
+                    return new byte[] { 1, 1, 1 };
+                case MPKCParamNames.FM12T31S256:
+                    return new byte[] { 1, 2, 0 };
+                case MPKCParamNames.FM12T41S256:
+                    return new byte[] { 1, 2, 1 };
+                case MPKCParamNames.FM12T48S256:
+                    return new byte[] { 1, 2, 2 };
+                case MPKCParamNames.FM12T54K256:
+                    return new byte[] { 1, 2, 3 };
+                case MPKCParamNames.FM12T67S256:
+                    return new byte[] { 1, 2, 4 };
+                case MPKCParamNames.FM13T29S256:
+                    return new byte[] { 1, 3, 0 };
+                case MPKCParamNames.FM13T44K256:
+                    return new byte[] { 1, 3, 1 };
+                case MPKCParamNames.FM13T95S256:
+                    return new byte[] { 1, 3, 2 };
+                case MPKCParamNames.FM14T24K256:
+                    return new byte[] { 1, 4, 0 };
+                default:
+                    throw new MPKCException("MPKCParamSets:GetID", "The Parameter Name is not recognized!", new ArgumentException());
             }
         }
         #endregion

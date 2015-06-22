@@ -91,15 +91,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <param name="Field">The finite field GF(2^m)</param>
         /// <param name="Degree">The  degree of polynomial</param>
         /// <param name="PolynomialType">The  type of polynomial</param>
-        /// <param name="SecRnd">The SecureRandom instance</param>
-        public PolynomialGF2mSmallM(GF2mField Field, int Degree, char PolynomialType, SecureRandom SecRnd)
+        /// <param name="Rand">The IRandom instance</param>
+        public PolynomialGF2mSmallM(GF2mField Field, int Degree, char PolynomialType, IRandom Rand)
         {
             _field = Field;
 
             switch (PolynomialType)
             {
                 case PolynomialGF2mSmallM.RANDOM_IRREDUCIBLE_POLYNOMIAL:
-                    _coefficients = CreateRandomIrreduciblePolynomial(Degree, SecRnd);
+                    _coefficients = CreateRandomIrreduciblePolynomial(Degree, Rand);
                     break;
                 default:
                     throw new ArgumentException(" Error: type " + PolynomialType + " is not defined for GF2smallmPolynomial");
@@ -737,7 +737,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <param name="SecRnd">The source of randomness</param>
         /// 
         /// <returns>he generated irreducible polynomial</returns>
-        private int[] CreateRandomIrreduciblePolynomial(int Degree, SecureRandom SecRnd)
+        private int[] CreateRandomIrreduciblePolynomial(int Degree, IRandom SecRnd)
         {
             int[] resCoeff = new int[Degree + 1];
             int[] resTemp = new int[Degree + 1];
@@ -777,7 +777,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <param name="GFM">The Gf2 field</param>
         /// 
         /// <returns>A random element</returns>
-        private static int GetRandomElement(SecureRandom SecRnd, GF2mField GFM)
+        private static int GetRandomElement(IRandom SecRnd, GF2mField GFM)
         {
             return RandomDegree.NextInt(SecRnd, 1 << GFM.Degree);
         }

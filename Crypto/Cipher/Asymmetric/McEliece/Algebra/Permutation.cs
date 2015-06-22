@@ -77,7 +77,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// 
         /// <param name="N">The size of the permutation</param>
         /// <param name="SecRnd">The source of randomness</param>
-        public Permutation(int N, SecureRandom SecRnd)
+        public Permutation(int N, IRandom SecRnd)
         {
             if (N <= 0)
                 throw new ArgumentException("Permutation: Invalid length!");

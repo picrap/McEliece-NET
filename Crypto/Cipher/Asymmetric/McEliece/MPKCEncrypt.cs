@@ -63,7 +63,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
     /// <item><description>Inspired by the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> versions McEliece implementation.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class MPKCEncrypt : IAsymmetricCipher, IDisposable
+    public sealed class MPKCEncrypt : IAsymmetricCipher
     {
         #region Fields
         private IMPKCCiphers _encEngine;
@@ -77,12 +77,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <summary>
         /// Get: The maximum number of bytes the cipher can encrypt
         /// </summary>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the cipher is not initialized</exception>
         public int MaxCipherText
         {
             get 
             {
                 if (_maxCipherText == 0 || !_isInitialized)
-                    throw new MPKCException("The cipher must be initialized before size can be calculated!");
+                    throw new MPKCException("MPKCEncrypt:MaxCipherText", "The cipher must be initialized before size can be calculated!", new InvalidOperationException());
 
                 return _maxCipherText; 
             }
@@ -91,12 +93,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <summary>
         /// Get: The maximum number of bytes the cipher can decrypt
         /// </summary>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the cipher is not initialized</exception>
         public int MaxPlainText
         {
             get 
             {
                 if (_maxPlainText == 0 || !_isInitialized)
-                    throw new MPKCException("The cipher must be initialized before size can be calculated!");
+                    throw new MPKCException("MPKCEncrypt:MaxPlainText", "The cipher must be initialized before size can be calculated!", new InvalidOperationException());
 
                 return _maxPlainText; 
             }
@@ -135,10 +139,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <param name="Input">The cipher text</param>
         /// 
         /// <returns>The plain text</returns>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the cipher is not initialized</exception>
         public byte[] Decrypt(byte[] Input)
         {
             if (!_isInitialized)
-                throw new MPKCException("The cipher has not been initialized!");
+                throw new MPKCException("MPKCEncrypt:Decrypt", "The cipher has not been initialized!", new InvalidOperationException());
 
             return _encEngine.Decrypt(Input);
         }
@@ -150,12 +156,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <param name="Input">The plain text</param>
         /// 
         /// <returns>The cipher text</returns>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the cipher is not initialized, or the input text is invalid</exception>
         public byte[] Encrypt(byte[] Input)
         {
             if (!_isInitialized)
-                throw new MPKCException("The cipher has not been initialized!");
+                throw new MPKCException("MPKCEncrypt:Encrypt", "The cipher has not been initialized!", new InvalidOperationException());
             if (Input.Length > _maxPlainText)
-                throw new ArgumentException("The input text is too long!");
+                throw new MPKCException("MPKCEncrypt:Encrypt", "The input text is too long!", new ArgumentException());
 
             return _encEngine.Encrypt(Input);
         }
@@ -167,17 +175,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <param name="Key">The key</param>
         /// 
         /// <returns>The size of the key</returns>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the cipher is not initialized</exception>
         public int GetKeySize(IAsymmetricKey Key)
         {
             if (!_isInitialized)
-                throw new MPKCException("The cipher has not been initialized!");
+                throw new MPKCException("MPKCEncrypt:GetKeySize", "The cipher has not been initialized!", new InvalidOperationException());
 
             if (Key is MPKCPublicKey)
                 return ((MPKCPublicKey)Key).N;
             if (Key is MPKCPrivateKey)
                 return ((MPKCPrivateKey)Key).N;
 
-            throw new MPKCException("Unsupported key type!");
+            throw new MPKCException("MPKCEncrypt:GetKeySize", "Unsupported key type!", new ArgumentException());
         }
 
         /// <summary>
@@ -187,10 +197,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// 
         /// <param name="Encryption">When true cipher is for encryption, if false, decryption</param>
         /// <param name="KeyPair">The <see cref="IAsymmetricKeyPair"/> containing the McEliece public or private key</param>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the cipher is not initialized or the key is invalid</exception>
         public void Initialize(bool Encryption, IAsymmetricKeyPair KeyPair)
         {
             if (!(KeyPair is MPKCKeyPair))
-                throw new MPKCException("Not a valid McEliece key pair!");
+                throw new MPKCException("MPKCEncrypt:Initialize", "Not a valid McEliece key pair!", new InvalidOperationException());
 
             // init implementation engine
             _encEngine.Initialize(Encryption, KeyPair);
@@ -199,9 +211,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
             if (Encryption)
             {
                 if (KeyPair.PublicKey == null)
-                    throw new MPKCException("Encryption requires a public key!");
+                    throw new MPKCException("MPKCEncrypt:Initialize", "Encryption requires a public key!", new InvalidOperationException());
                 if (!(KeyPair.PublicKey is MPKCPublicKey))
-                    throw new MPKCException("The public key is invalid!");
+                    throw new MPKCException("MPKCEncrypt:Initialize", "The public key is invalid!", new ArgumentException());
 
                 MPKCPublicKey pub = (MPKCPublicKey)KeyPair.PublicKey;
                 _maxCipherText = pub.N >> 3;
@@ -210,9 +222,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
             else
             {
                 if (KeyPair.PrivateKey == null)
-                    throw new MPKCException("Decryption requires a private key!");
+                    throw new MPKCException("MPKCEncrypt:Initialize", "Decryption requires a private key!", new InvalidOperationException());
                 if (!(KeyPair.PrivateKey is MPKCPrivateKey))
-                    throw new MPKCException("The private key is invalid!");
+                    throw new MPKCException("MPKCEncrypt:Initialize", "The private key is invalid!", new ArgumentException());
 
                 MPKCPrivateKey pri = (MPKCPrivateKey)KeyPair.PrivateKey;
                 _maxPlainText = pri.K >> 3;
@@ -233,7 +245,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <returns>An initialized cipher</returns>
         private IMPKCCiphers GetEngine(MPKCParameters CipherParams)
         {
-            switch (CipherParams.Engine)
+            switch (CipherParams.CCA2Engine)
             {
                 case McElieceCiphers.KobaraImai:
                     return new KobaraImaiCipher(CipherParams);

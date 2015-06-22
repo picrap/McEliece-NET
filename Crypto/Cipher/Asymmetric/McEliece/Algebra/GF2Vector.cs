@@ -51,7 +51,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// 
         /// <param name="Length">The length of the vector</param>
         /// <param name="SecRnd">The source of randomness</param>
-        public GF2Vector(int Length, SecureRandom SecRnd)
+        public GF2Vector(int Length, IRandom SecRnd)
         {
             this.Length = Length;
 
@@ -77,7 +77,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// <param name="Length">The length of the vector</param>
         /// <param name="T">The number of non-zero coefficients</param>
         /// <param name="SecRnd">The source of randomness</param>
-        public GF2Vector(int Length, int T, SecureRandom SecRnd)
+        public GF2Vector(int Length, int T, IRandom SecRnd)
         {
             if (T > Length)
                 throw new ArithmeticException("The hamming weight is greater than the length of vector.");

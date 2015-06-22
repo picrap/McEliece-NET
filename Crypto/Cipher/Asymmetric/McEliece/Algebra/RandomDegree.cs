@@ -6,18 +6,18 @@ using VTDev.Libraries.CEXEngine.Utility;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
 {
     /// <summary>
-    /// Extends the SecureRandom class
+    /// Extends the IRandom class
     /// </summary>
     internal sealed class RandomDegree
     {
         /// <summary>
         /// Get a random number using a degree over a polynomial field
         /// </summary>
-        /// <param name="SecRnd">The SecureRandom instance</param>
+        /// <param name="SecRnd">The IRandom instance</param>
         /// <param name="N">The polynomial degree</param>
         /// 
         /// <returns>A random number</returns>
-        internal static int NextInt(SecureRandom SecRnd, int N)
+        internal static int NextInt(IRandom SecRnd, int N)
         {
             // i.e., n is a power of 2
             if ((N & -N) == N) 

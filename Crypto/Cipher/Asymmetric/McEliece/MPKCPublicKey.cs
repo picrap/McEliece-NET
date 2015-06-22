@@ -11,7 +11,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
     /// <summary>
     /// A McEliece public key
     /// </summary>
-    public sealed class MPKCPublicKey : IAsymmetricKey, ICloneable, IDisposable
+    public sealed class MPKCPublicKey : IAsymmetricKey
     {
         #region Fields
         private bool _isDisposed = false;
@@ -86,6 +86,38 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
             _G = new GF2Matrix(G);
         }
 
+        /// <summary>
+        /// Reconstructs a public key from its <c>byte</c> array representation.
+        /// </summary>
+        /// 
+        /// <param name="KeyStream">An input stream containing an encoded key</param>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the key could not be loaded</exception>
+        public MPKCPublicKey(Stream KeyStream)
+        {
+            try
+            {
+                BinaryReader reader = new BinaryReader(KeyStream);
+                _N = reader.ReadInt32();
+                _T = reader.ReadInt32();
+                _G = new GF2Matrix(reader.ReadBytes((int)(reader.BaseStream.Length - reader.BaseStream.Position)));
+            }
+            catch (IOException ex)
+            {
+                throw new MPKCException("MPKCPublicKey:CTor", "The Public key could not be loaded!", ex);
+            }
+        }
+        
+        /// <summary>
+        /// Reconstructs a public key from its <c>byte</c> array representation.
+        /// </summary>
+        /// 
+        /// <param name="Key">The encoded key array</param>
+        public MPKCPublicKey(byte[] Key) :
+            this(new MemoryStream(Key))
+        {
+        }
+
         private MPKCPublicKey()
         {
         }
@@ -102,7 +134,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         #region Public Methods
         /// <summary>
         /// Read a Public key from a byte array.
-        /// <para>The array can contain only the public key.</para>
+        /// <para>The array can contain only the public key.
+        /// Reads from the streams starting (0) position.</para>
         /// </summary>
         /// 
         /// <param name="KeyArray">The byte array containing the key</param>
@@ -110,22 +143,22 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// <returns>An initialized MPKCPublicKey class</returns>
         public static MPKCPublicKey From(byte[] KeyArray)
         {
-            return From(new MemoryStream(KeyArray));// ToDo: offset/length? for stream?
+            return From(new MemoryStream(KeyArray));
         }
 
         /// <summary>
-        /// Read a Public key from a byte array.
-        /// <para>The stream can contain only the public key.</para>
+        /// Read a Public key from a stream
         /// </summary>
         /// 
-        /// <param name="KeyStream">The byte array containing the key</param>
+        /// <param name="KeyStream">The stream containing the key</param>
         /// 
         /// <returns>An initialized MPKCPublicKey class</returns>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the stream can not be read</exception>
         public static MPKCPublicKey From(Stream KeyStream)
         {
             try
             {
-                KeyStream.Seek(0, SeekOrigin.Begin);
                 BinaryReader reader = new BinaryReader(KeyStream);
                 int n = reader.ReadInt32();
                 int t = reader.ReadInt32();
@@ -134,9 +167,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
 
                 return pubKey;
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                throw new MPKCException("MPKCPublicKey:Ctor", ex.Message, ex);
             }
         }
 
@@ -183,11 +216,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// 
         /// <param name="Output">KeyPair as a byte array; can be initialized as zero bytes</param>
         /// <param name="Offset">The starting position within the Output array</param>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the output array is too small</exception>
         public void WriteTo(byte[] Output, int Offset)
         {
             byte[] data = ToBytes();
             if (Offset + data.Length > Output.Length - Offset)
-                throw new MPKCException("The output array is too small!");
+                throw new MPKCException("MPKCPublicKey:WriteTo", "The output array is too small!", new ArgumentOutOfRangeException());
 
             Buffer.BlockCopy(data, 0, Output, Offset, data.Length);
         }

@@ -98,7 +98,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// 
         /// <param name="Gf2n">The field</param>
         /// <param name="SecRnd">The source of randomness</param>
-        public GF2nONBElement(GF2nONBField Gf2n, SecureRandom SecRnd)
+        public GF2nONBElement(GF2nONBField Gf2n, IRandom SecRnd)
         {
             mField = Gf2n;
             mDegree = mField.Degree;
@@ -109,14 +109,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
             if (_mLength > 1)
             {
                 for (int j = 0; j < _mLength - 1; j++)
-                    _mPol[j] = SecRnd.NextInt64(); //ju next long?
+                    _mPol[j] = SecRnd.NextLong(); //ju next long?
                 
                 long last = SecRnd.Next();
                 _mPol[_mLength - 1] = IntUtils.URShift(last, (MAXLONG - _mBit));
             }
             else
             {
-                _mPol[0] = SecRnd.NextInt64();
+                _mPol[0] = SecRnd.NextLong();
                 _mPol[0] = IntUtils.URShift(_mPol[0], (MAXLONG - _mBit));
             }
         }

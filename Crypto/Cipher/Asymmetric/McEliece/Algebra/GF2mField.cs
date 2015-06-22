@@ -216,32 +216,32 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece.Algebra
         /// Create a random field element using PRNG
         /// </summary>
         /// 
-        /// <param name="SecRnd">The SecureRandom instance</param>
+        /// <param name="SecRnd">The IRandom instance</param>
         /// 
         /// <returns>A random element</returns>
-        public int GetRandomElement(SecureRandom SecRnd)
+        public int GetRandomElement(IRandom SecRnd)
         {
             return RandomDegree.NextInt(SecRnd, 1 << _degree);
         }
 
-        /// <summary>
+        /*/// <summary>
         /// Create a random non-zero field element
         /// </summary>
         /// 
         /// <returns>A random non zero element</returns>
-        public int GetRandomNonZeroElement()
+        public int GetRandomNonZeroElement(IRandom SecRnd)
         {
-            return GetRandomNonZeroElement(new SecureRandom());
-        }
+            return GetRandomNonZeroElement(SecRnd);
+        }*/
 
         /// <summary>
         /// Create a random non-zero field element
         /// </summary>
         /// 
-        /// <param name="SecRnd">The SecureRandom instance</param>
+        /// <param name="SecRnd">The IRandom instance</param>
         /// 
         /// <returns>A random non zero element</returns>
-        public int GetRandomNonZeroElement(SecureRandom SecRnd)
+        public int GetRandomNonZeroElement(IRandom SecRnd)
         {
             int controltime = 1 << 20;
             int count = 0;

@@ -72,6 +72,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmerticGenerator.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmetricParameters.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\McEliece\MPKCCiphers\IMPKCCiphers.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\McEliece\MPKCParamSets.cs" />

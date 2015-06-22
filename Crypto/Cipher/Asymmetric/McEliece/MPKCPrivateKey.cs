@@ -11,7 +11,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
     /// <summary>
     /// A McEliece private key
     /// </summary>
-    public sealed class MPKCPrivateKey : IAsymmetricKey, ICloneable, IDisposable
+    public sealed class MPKCPrivateKey : IAsymmetricKey
     {
         #region Constants
         private const int GF_LENGTH = 4;
@@ -170,19 +170,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         }
 
         /// <summary>
-        /// Read a Public key from a byte array.
-        /// <para>The stream can contain only the public key.</para>
+        /// Read a Public key from a byte stream
         /// </summary>
         /// 
-        /// <param name="KeyStream">The byte array containing the key</param>
+        /// <param name="KeyStream">The stream containing the key</param>
         /// 
         /// <returns>An initialized MPKCPublicKey class</returns>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the stream can not be read</exception>
         public static MPKCPrivateKey From(Stream KeyStream)
         {
             try
             {
                 int len;
-
                 BinaryReader reader = new BinaryReader(KeyStream);
                 // length
                 int n = reader.ReadInt32();
@@ -212,9 +212,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
 
                 return new MPKCPrivateKey(n, k, gf, gp, p1, h, qi);
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                throw new MPKCException("MPKCPrivateKey:Ctor", ex.Message, ex);
             }
         }
 
@@ -287,11 +287,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// 
         /// <param name="Output">KeyPair as a byte array; can be initialized as zero bytes</param>
         /// <param name="Offset">The starting position within the Output array</param>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the output array is too small</exception>
         public void WriteTo(byte[] Output, int Offset)
         {
             byte[] data = ToBytes();
             if (Offset + data.Length > Output.Length - Offset)
-                throw new MPKCException("The output array is too small!");
+                throw new MPKCException("MPKCPrivateKey:WriteTo", "The output array is too small!", new ArgumentOutOfRangeException());
 
             Buffer.BlockCopy(data, 0, Output, Offset, data.Length);
         }
@@ -301,6 +303,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
         /// </summary>
         /// 
         /// <param name="Output">Output Stream</param>
+        /// 
+        /// <exception cref="MPKCException">Thrown if an IO error is raised</exception>
         public void WriteTo(Stream Output)
         {
             try
@@ -308,9 +312,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece
                 using (MemoryStream stream = ToStream())
                     stream.WriteTo(Output);
             }
-            catch (IOException e)
+            catch (IOException ex)
             {
-                throw new MPKCException(e.Message);
+                throw new MPKCException("MPKCPrivateKey:WriteTo", ex.Message, ex);
             }
         }
         #endregion
