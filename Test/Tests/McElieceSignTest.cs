@@ -1,9 +1,7 @@
 ﻿using System;
-using VTDev.Libraries.CEXEngine.Crypto;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.McEliece;
-using VTDev.Libraries.CEXEngine.Tools;
 using System.IO;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
 
 namespace Test.Tests
 {

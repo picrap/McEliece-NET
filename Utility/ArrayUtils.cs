@@ -168,6 +168,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="Arrays">Arrays to be joined</param>
         /// 
         /// <returns>Joined array</returns>
+        [CLSCompliant(false)]
         public static int[] Concat(params int[][] Arrays)
         {
             int len = 0;
@@ -217,6 +218,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <param name="Arrays">Arrays to be joined</param>
         /// 
         /// <returns>Joined array</returns>
+        [CLSCompliant(false)]
         public static long[] Concat(params long[][] Arrays)
         {
             int len = 0;
