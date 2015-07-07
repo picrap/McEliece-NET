@@ -19,9 +19,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         /// Initialize the cipher
         /// </summary>
         /// 
-        /// <param name="Encryption">When true cipher is for encryption, if false, decryption</param>
-        /// <param name="KeyPair">The public and private key pair</param>
-        void Initialize(bool Encryption, IAsymmetricKeyPair KeyPair);
+        /// <param name="KeyPair">The public or private key</param>
+        void Initialize(IAsymmetricKey AsmKey);
 
         /// <summary>
         /// Decrypt a cipher text

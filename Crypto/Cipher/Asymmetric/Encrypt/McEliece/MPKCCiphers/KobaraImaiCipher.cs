@@ -9,6 +9,8 @@ using VTDev.Libraries.CEXEngine.Crypto.Generator;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Numeric;
 using VTDev.Libraries.CEXEngine.Utility;
+using VTDev.Libraries.CEXEngine.Exceptions;
+using System.IO;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCCiphers
@@ -31,16 +33,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         #endregion
 
         #region Fields
+        private IAsymmetricKey _asmKey;
+        private MPKCParameters _cprParams;
+        private IDigest _dgtEngine;
         private bool _isDisposed = false;
         private bool _isEncryption = false;
-        private IAsymmetricKeyPair _keyPair;
         private int _maxPlainText;
-        private IDigest _dgtEngine;
-        private IRandom _secRnd;
+        private IRandom _rndEngine;
         private int _K;
         private int _N;
         private int _T;
-        private MPKCParameters _cipherParams;
         #endregion
 
         #region Properties
@@ -65,7 +67,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         {
             if (Info != null)
                 KobaraImaiCipher.MPKCINFO = Info;
-            _cipherParams = Parameters;
+
+            _cprParams = Parameters;
             _dgtEngine = GetDigest(Parameters.Digest);
         }
 
@@ -88,10 +91,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         /// <returns>The plain text</returns>
         public byte[] Decrypt(byte[] Input)
         {
+            if (_isEncryption)
+                throw new CryptoAsymmetricSignException("KobaraImaiCipher:Decrypt", "The cipher is not initialized for decryption!", new ArgumentException());
+
             int nDiv8 = _N >> 3;
 
             if (Input.Length < nDiv8)
-                throw new Exception("Bad Padding: Ciphertext too short.");
+                throw new CryptoAsymmetricSignException("KobaraImaiCipher:Decrypt", "Bad Padding: Ciphertext too short!", new ArgumentException());
 
             int c2Len = _dgtEngine.DigestSize;
             int c4Len = _K >> 3;
@@ -114,7 +120,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
             // convert encC4 into vector over GF(2)
             GF2Vector encC4Vec = GF2Vector.OS2VP(_N, encC4);
             // decrypt encC4Vec to obtain c4 and error vector z
-            GF2Vector[] c4z = CCA2Primitives.Decrypt((MPKCPrivateKey)_keyPair.PrivateKey, encC4Vec);
+            GF2Vector[] c4z = CCA2Primitives.Decrypt((MPKCPrivateKey)_asmKey, encC4Vec);
             byte[] c4 = c4z[0].GetEncoded();
             GF2Vector z = c4z[1];
 
@@ -145,7 +151,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
 
             byte[] mConstPrime;
             // get PRNG object
-            using (KDF2Drbg sr0 = new KDF2Drbg(GetDigest(_cipherParams.Digest)))
+            using (KDF2Drbg sr0 = new KDF2Drbg(GetDigest(_cprParams.Digest)))
             {
                 // seed PRNG with r'
                 sr0.Initialize(rPrime);
@@ -159,14 +165,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
                 mConstPrime[i] ^= c1[i];
 
             if (mConstPrime.Length < c1Len)
-                throw new Exception("Bad Padding: invalid ciphertext");
+                throw new CryptoAsymmetricSignException("KobaraImaiCipher:Decrypt", "Bad Padding: invalid ciphertext!", new ArgumentException());
 
             byte[][] temp = ByteUtils.Split(mConstPrime, c1Len - MPKCINFO.Length);
             byte[] mr = temp[0];
             byte[] constPrime = temp[1];
 
             if (!ByteUtils.Equals(constPrime, MPKCINFO))
-                throw new Exception("Bad Padding: invalid ciphertext");
+                throw new CryptoAsymmetricSignException("KobaraImaiCipher:Decrypt", "Bad Padding: invalid ciphertext!", new ArgumentException());
 
             return mr;
         }
@@ -180,6 +186,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         /// <returns>The cipher text</returns>
         public byte[] Encrypt(byte[] Input)
         {
+            if (!_isEncryption)
+                throw new CryptoAsymmetricSignException("KobaraImaiCipher:Encrypt", "The cipher is not initialized for encryption!", new ArgumentException());
+
             int c2Len = _dgtEngine.DigestSize;
             int c4Len = _K >> 3;
             int c5Len = (BigMath.Binomial(_N, _T).BitLength - 1) >> 3;
@@ -198,12 +207,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
 
             // generate random r of length c2Len bytes
             byte[] r = new byte[c2Len];
-            _secRnd.GetBytes(r);
+            _rndEngine.GetBytes(r);
 
             byte[] c1;
             // get PRNG object ToDo:
             //DigestRandomGenerator sr0 = new DigestRandomGenerator(new SHA1Digest()); //why bc, why?
-            using (KDF2Drbg sr0 = new KDF2Drbg(GetDigest(_cipherParams.Digest)))
+            using (KDF2Drbg sr0 = new KDF2Drbg(GetDigest(_cprParams.Digest)))
             {
                 // seed PRNG with r'
                 sr0.Initialize(r);
@@ -246,7 +255,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
             // convert c5 to error vector z
             GF2Vector z = CCA2Conversions.Encode(_N, _T, c5);
             // compute encC4 = E(c4, z)
-            byte[] encC4 = CCA2Primitives.Encrypt((MPKCPublicKey)_keyPair.PublicKey, c4Vec, z).GetEncoded();
+            byte[] encC4 = CCA2Primitives.Encrypt((MPKCPublicKey)_asmKey, c4Vec, z).GetEncoded();
 
             // if c6Len > 0 return (c6||encC4)
             if (c6Len > 0)
@@ -261,14 +270,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         /// </summary>
         /// 
         /// <returns>The size of the key</returns>
-        public int GetKeySize(IAsymmetricKey Key)
+        public int GetKeySize(IAsymmetricKey AsmKey)
         {
-            if (Key is MPKCPublicKey)
-                return ((MPKCPublicKey)Key).N;
-            if (Key is MPKCPrivateKey)
-                return ((MPKCPrivateKey)Key).N;
+            if (AsmKey is MPKCPublicKey)
+                return ((MPKCPublicKey)AsmKey).N;
+            if (AsmKey is MPKCPrivateKey)
+                return ((MPKCPrivateKey)AsmKey).N;
 
-            throw new ArgumentException("unsupported type");
+            throw new CryptoAsymmetricSignException("KobaraImaiCipher:Encrypt", "Unsupported Key type!", new ArgumentException());
         }
 
         /// <summary>
@@ -276,26 +285,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         /// <para>Requires a <see cref="MPKCPublicKey"/> for encryption, or a <see cref="MPKCPrivateKey"/> for decryption</para>
         /// </summary>
         /// 
-        /// <param name="Encryption">When true cipher is for encryption, if false, decryption</param>
-        /// <param name="KeyPair">The <see cref="IAsymmetricKeyPair"/> containing the McEliece public or private key</param>
-        public void Initialize(bool Encryption, IAsymmetricKeyPair KeyPair)
+        /// <param name="AsmKey">The <see cref="IAsymmetricKey"/> containing the McEliece public or private key</param>
+        public void Initialize(IAsymmetricKey AsmKey)
         {
-            _isEncryption = Encryption;
-            _keyPair = KeyPair;
+            if (!(AsmKey is MPKCPublicKey) && !(AsmKey is MPKCPrivateKey))
+                throw new CryptoAsymmetricSignException("KobaraImaiCipher:Initialize", "The key is not a valid McEliece key!", new InvalidDataException());
+
+            _isEncryption = (AsmKey is MPKCPublicKey);
+
+            _asmKey = AsmKey;
 
             if (_isEncryption)
             {
-                _secRnd = GetPrng(_cipherParams.RandomEngine);
-                _N = ((MPKCPublicKey)KeyPair.PublicKey).N;
-                _K = ((MPKCPublicKey)KeyPair.PublicKey).K;
-                _T = ((MPKCPublicKey)KeyPair.PublicKey).T;
-                _maxPlainText = (((MPKCPublicKey)KeyPair.PublicKey).K >> 3);
+                _rndEngine = GetPrng(_cprParams.RandomEngine);
+                _N = ((MPKCPublicKey)AsmKey).N;
+                _K = ((MPKCPublicKey)AsmKey).K;
+                _T = ((MPKCPublicKey)AsmKey).T;
+                _maxPlainText = (((MPKCPublicKey)AsmKey).K >> 3);
             }
             else
             {
-                _N = ((MPKCPrivateKey)KeyPair.PrivateKey).N;
-                _K = ((MPKCPrivateKey)KeyPair.PrivateKey).K;
-                _T = ((MPKCPrivateKey)KeyPair.PrivateKey).T;
+                _N = ((MPKCPrivateKey)AsmKey).N;
+                _K = ((MPKCPrivateKey)AsmKey).K;
+                _T = ((MPKCPrivateKey)AsmKey).T;
             }
         }
         #endregion
@@ -333,7 +345,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
                 case Digests.Skein1024:
                     return new Skein1024();
                 default:
-                    throw new ArgumentException("The digest type is not supported!");
+                    throw new CryptoAsymmetricSignException("KobaraImaiCipher:GetDigest", "The digest type is not supported!", new ArgumentException());
             }
         }
 
@@ -365,7 +377,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
                 case Prngs.QCG2:
                     return new QCG2();
                 default:
-                    throw new ArgumentException("The Prng type is not supported!");
+                    throw new CryptoAsymmetricSignException("KobaraImaiCipher:GetPrng", "The Prng type is not supported!", new ArgumentException());
             }
         }
         #endregion
@@ -391,10 +403,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
                         _dgtEngine.Dispose();
                         _dgtEngine = null;
                     }
-                    if (_secRnd != null)
+                    if (_rndEngine != null)
                     {
-                        _secRnd.Dispose();
-                        _secRnd = null;
+                        _rndEngine.Dispose();
+                        _rndEngine = null;
                     }
                     _K = 0;
                     _N = 0;

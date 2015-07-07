@@ -4,6 +4,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCCi
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Exceptions;
+using System.IO;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
@@ -25,14 +26,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
     /// // encrypt an array
     /// using (MPKCEncrypt cipher = new MPKCEncrypt(ps))
     /// {
-    ///     cipher.Initialize(true, new MPKCKeyPair(kp.PublicKey));
+    ///     cipher.Initialize(kp.PublicKey);
     ///     enc = cipher.Encrypt(data);
     /// }
     /// 
     /// // decrypt the cipher text
     /// using (MPKCEncrypt cipher = new MPKCEncrypt(ps))
     /// {
-    ///     cipher.Initialize(false, new MPKCKeyPair(kp.PrivateKey));
+    ///     cipher.Initialize(kp.PrivateKey);
     ///     dec = cipher.Decrypt(enc);
     /// }
     /// </code>
@@ -73,9 +74,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
     /// </remarks>
     public sealed class MPKCEncrypt : IAsymmetricCipher
     {
+        #region Constants
+        private const string ALG_NAME = "MPKCEncrypt";
+        #endregion
+
         #region Fields
         private IMPKCCiphers _encEngine;
         private bool _isDisposed = false;
+        private bool _isEncryption = false;
         private bool _isInitialized = false;
         private int _maxPlainText;
         private int _maxCipherText;
@@ -112,6 +118,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
 
                 return _maxPlainText; 
             }
+        }
+
+        /// <summary>
+        /// Get: Cipher name
+        /// </summary>
+        public string Name
+        {
+            get { return ALG_NAME; }
         }
         #endregion
 
@@ -153,6 +167,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         {
             if (!_isInitialized)
                 throw new CryptoAsymmetricException("MPKCEncrypt:Decrypt", "The cipher has not been initialized!", new InvalidOperationException());
+            if (_isEncryption)
+                throw new CryptoAsymmetricSignException("MPKCEncrypt:Decrypt", "The cipher is not initialized for decryption!", new ArgumentException());
 
             return _encEngine.Decrypt(Input);
         }
@@ -172,6 +188,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
                 throw new CryptoAsymmetricException("MPKCEncrypt:Encrypt", "The cipher has not been initialized!", new InvalidOperationException());
             if (Input.Length > _maxPlainText)
                 throw new CryptoAsymmetricException("MPKCEncrypt:Encrypt", "The input text is too long!", new ArgumentException());
+            if (!_isEncryption)
+                throw new CryptoAsymmetricSignException("MPKCEncrypt:Encrypt", "The cipher is not initialized for encryption!", new ArgumentException());
 
             return _encEngine.Encrypt(Input);
         }
@@ -203,40 +221,39 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <para>Requires a <see cref="MPKCPublicKey"/> for encryption, or a <see cref="MPKCPrivateKey"/> for decryption</para>
         /// </summary>
         /// 
-        /// <param name="Encryption">When true cipher is for encryption, if false, decryption</param>
-        /// <param name="KeyPair">The <see cref="IAsymmetricKeyPair"/> containing the McEliece public or private key</param>
+        /// <param name="AsmKey">The <see cref="IAsymmetricKey"/> containing the McEliece public or private key</param>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if the cipher is not initialized or the key is invalid</exception>
-        public void Initialize(bool Encryption, IAsymmetricKeyPair KeyPair)
+        public void Initialize(IAsymmetricKey AsmKey)
         {
-            if (!(KeyPair is MPKCKeyPair))
-                throw new CryptoAsymmetricException("MPKCEncrypt:Initialize", "Not a valid McEliece key pair!", new InvalidOperationException());
+            if (!(AsmKey is MPKCPublicKey) && !(AsmKey is MPKCPrivateKey))
+                throw new CryptoAsymmetricSignException("MPKCEncrypt:Initialize", "The key is not a valid Ring-KWE key!", new InvalidDataException());
+
+            _isEncryption = (AsmKey is MPKCPublicKey);
 
             // init implementation engine
-            _encEngine.Initialize(Encryption, KeyPair);
+            _encEngine.Initialize(AsmKey);
 
             // get the sizes
-            if (Encryption)
+            if (_isEncryption)
             {
-                if (KeyPair.PublicKey == null)
+                if (AsmKey == null)
                     throw new CryptoAsymmetricException("MPKCEncrypt:Initialize", "Encryption requires a public key!", new InvalidOperationException());
-                if (!(KeyPair.PublicKey is MPKCPublicKey))
+                if (!(AsmKey is MPKCPublicKey))
                     throw new CryptoAsymmetricException("MPKCEncrypt:Initialize", "The public key is invalid!", new ArgumentException());
 
-                MPKCPublicKey pub = (MPKCPublicKey)KeyPair.PublicKey;
-                _maxCipherText = pub.N >> 3;
-                _maxPlainText = pub.K >> 3;
+                _maxCipherText = ((MPKCPublicKey)AsmKey).N >> 3;
+                _maxPlainText = ((MPKCPublicKey)AsmKey).K >> 3;
             }
             else
             {
-                if (KeyPair.PrivateKey == null)
+                if (AsmKey == null)
                     throw new CryptoAsymmetricException("MPKCEncrypt:Initialize", "Decryption requires a private key!", new InvalidOperationException());
-                if (!(KeyPair.PrivateKey is MPKCPrivateKey))
+                if (!(AsmKey is MPKCPrivateKey))
                     throw new CryptoAsymmetricException("MPKCEncrypt:Initialize", "The private key is invalid!", new ArgumentException());
 
-                MPKCPrivateKey pri = (MPKCPrivateKey)KeyPair.PrivateKey;
-                _maxPlainText = pri.K >> 3;
-                _maxCipherText = pri.N >> 3;
+                _maxPlainText = ((MPKCPrivateKey)AsmKey).K >> 3;
+                _maxCipherText = ((MPKCPrivateKey)AsmKey).N>> 3;
             }
 
             _isInitialized = true;

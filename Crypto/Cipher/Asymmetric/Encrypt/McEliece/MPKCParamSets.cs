@@ -120,36 +120,36 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             if (OId[2] == 11)
             {
                 if (OId[3] == 1)
-                    return (MPKCParameters)MPKCFM11T40S256.Clone();
+                    return (MPKCParameters)MPKCFM11T40S256.DeepCopy();
                 else if (OId[3] == 2)
-                    return (MPKCParameters)MPKCFM11T48S256.Clone();
+                    return (MPKCParameters)MPKCFM11T48S256.DeepCopy();
             }
             else if (OId[2] == 12)
             {
                 if (OId[3] == 1)
-                    return (MPKCParameters)MPKCFM12T31S256.Clone();
+                    return (MPKCParameters)MPKCFM12T31S256.DeepCopy();
                 else if (OId[3] == 2)
-                    return (MPKCParameters)MPKCFM12T41S256.Clone();
+                    return (MPKCParameters)MPKCFM12T41S256.DeepCopy();
                 else if (OId[3] == 3)
-                    return (MPKCParameters)MPKCFM12T48S256.Clone();
+                    return (MPKCParameters)MPKCFM12T48S256.DeepCopy();
                 else if (OId[3] == 4)
-                    return (MPKCParameters)MPKCFM12T54K256.Clone();
+                    return (MPKCParameters)MPKCFM12T54K256.DeepCopy();
                 else if (OId[3] == 5)
-                    return (MPKCParameters)MPKCFM12T67S256.Clone();
+                    return (MPKCParameters)MPKCFM12T67S256.DeepCopy();
             }
             else if (OId[2] == 13)
             {
                 if (OId[3] == 1)
-                    return (MPKCParameters)MPKCFM13T29S256.Clone();
+                    return (MPKCParameters)MPKCFM13T29S256.DeepCopy();
                 else if (OId[3] == 2)
-                    return (MPKCParameters)MPKCFM13T44K256.Clone();
+                    return (MPKCParameters)MPKCFM13T44K256.DeepCopy();
                 else if (OId[3] == 3)
-                    return (MPKCParameters)MPKCFM13T95S256.Clone();
+                    return (MPKCParameters)MPKCFM13T95S256.DeepCopy();
             }
             else if (OId[2] == 14)
             {
                 if (OId[3] == 1)
-                    return (MPKCParameters)MPKCFM14T24K256.Clone();
+                    return (MPKCParameters)MPKCFM14T24K256.DeepCopy();
             }
 
             throw new CryptoAsymmetricException("MPKCParamSets:FromId", "OId does not identify a valid param set!", new ArgumentException());
@@ -169,27 +169,27 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             switch (Name)
             {
                 case MPKCParamNames.FM11T40S256:
-                    return (MPKCParameters)MPKCFM11T40S256.Clone();
+                    return (MPKCParameters)MPKCFM11T40S256.DeepCopy();
                 case MPKCParamNames.FM11T48S256:
-                    return (MPKCParameters)MPKCFM11T48S256.Clone();
+                    return (MPKCParameters)MPKCFM11T48S256.DeepCopy();
                 case MPKCParamNames.FM12T31S256:
-                    return (MPKCParameters)MPKCFM12T31S256.Clone();
+                    return (MPKCParameters)MPKCFM12T31S256.DeepCopy();
                 case MPKCParamNames.FM12T41S256:
-                    return (MPKCParameters)MPKCFM12T41S256.Clone();
+                    return (MPKCParameters)MPKCFM12T41S256.DeepCopy();
                 case MPKCParamNames.FM12T48S256:
-                    return (MPKCParameters)MPKCFM12T48S256.Clone();
+                    return (MPKCParameters)MPKCFM12T48S256.DeepCopy();
                 case MPKCParamNames.FM12T54K256:
-                    return (MPKCParameters)MPKCFM12T54K256.Clone();
+                    return (MPKCParameters)MPKCFM12T54K256.DeepCopy();
                 case MPKCParamNames.FM12T67S256:
-                    return (MPKCParameters)MPKCFM12T67S256.Clone();
+                    return (MPKCParameters)MPKCFM12T67S256.DeepCopy();
                 case MPKCParamNames.FM13T29S256:
-                    return (MPKCParameters)MPKCFM13T29S256.Clone();
+                    return (MPKCParameters)MPKCFM13T29S256.DeepCopy();
                 case MPKCParamNames.FM13T44K256:
-                    return (MPKCParameters)MPKCFM13T44K256.Clone();
+                    return (MPKCParameters)MPKCFM13T44K256.DeepCopy();
                 case MPKCParamNames.FM13T95S256:
-                    return (MPKCParameters)MPKCFM13T95S256.Clone();
+                    return (MPKCParameters)MPKCFM13T95S256.DeepCopy();
                 case MPKCParamNames.FM14T24K256:
-                    return (MPKCParameters)MPKCFM14T24K256.Clone();
+                    return (MPKCParameters)MPKCFM14T24K256.DeepCopy();
                 default:
                     throw new CryptoAsymmetricException("MPKCParamSets:FromName", "The Parameter Name is not recognized!", new ArgumentException());
             }

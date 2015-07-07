@@ -1,9 +1,10 @@
 ﻿using System;
 using System.IO;
+using Test;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
 
-namespace Test.Tests
+namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.McEliece
 {
     /// <summary>
     /// Test the validity of the signing operations
@@ -57,24 +58,28 @@ namespace Test.Tests
         #region Private Methods
         private void TestSign()
         {
-            MPKCParameters mpar = MPKCParamSets.MPKCFM11T40S256;
+            MPKCParameters mpar = (MPKCParameters)MPKCParamSets.MPKCFM11T40S256.DeepCopy();
             MPKCKeyGenerator mkgen = new MPKCKeyGenerator(mpar);
             IAsymmetricKeyPair akp = mkgen.GenerateKeyPair();
 
             using (MPKCSign sgn = new MPKCSign(mpar))
             {
-                sgn.Initialize(akp);
-
+                sgn.Initialize(akp.PublicKey);
                 int sz = sgn.MaxPlainText - 1;
-                byte[] data = new byte[200];
+                byte[] data = new byte[320];
                 new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPRng().GetBytes(data);
 
                 byte[] code = sgn.Sign(data, 0, data.Length);
+
+                sgn.Initialize(akp.PrivateKey);
                 if (!sgn.Verify(data, 0, data.Length, code))
                     throw new Exception("EncryptionKey: private key comparison test failed!");
                 OnProgress(new TestEventArgs("Passed byte sign and verify"));
 
+                sgn.Initialize(akp.PublicKey);
                 code = sgn.Sign(new MemoryStream(data));
+
+                sgn.Initialize(akp.PrivateKey);
                 if (!sgn.Verify(new MemoryStream(data), code))
                     throw new Exception("EncryptionKey: private key comparison test failed!");
                 OnProgress(new TestEventArgs("Passed stream sign and verify"));

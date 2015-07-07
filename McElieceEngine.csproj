@@ -77,6 +77,7 @@
     <Compile Include="Crypto\Cipher\Asymmetric\Encrypt\McEliece\MPKCCiphers\CCA2Ciphers.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Encrypt\McEliece\MPKCCiphers\IMPKCCiphers.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Encrypt\McEliece\MPKCParamSets.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmetricSign.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Block\IBlockCipher.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Block\Mode\CBC.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Block\Mode\CFB.cs" />

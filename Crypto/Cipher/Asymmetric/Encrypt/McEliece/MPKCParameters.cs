@@ -64,6 +64,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         // The default error correcting capability
         private const int DEFAULT_T = 50;
         private const int OID_SIZE = 4;
+        private const string ALG_NAME = "MPKCParameters";
         #endregion
 
         #region Fields
@@ -79,6 +80,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Get: Parameters name
+        /// </summary>
+        public string Name
+        {
+            get { return ALG_NAME; }
+        }
+
+        /// <summary>
+        /// The cipher engine used for encryption
+        /// </summary>
+        public CCA2Ciphers CCA2Engine
+        {
+            get { return _cca2Engine; }
+            private set { _cca2Engine = value; }
+        }
+
         /// <summary>
         /// The digest engine used to power CCA2 variants
         /// </summary>
@@ -97,12 +115,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         }
 
         /// <summary>
-        /// The cipher engine used for encryption
+        /// Returns the field polynomial
         /// </summary>
-        public CCA2Ciphers CCA2Engine
+        public int FieldPolynomial
         {
-            get { return _cca2Engine; }
-            private set { _cca2Engine = value; }
+            get { return _fieldPoly; }
         }
 
         /// <summary>
@@ -121,6 +138,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             get { return _N; }
         }
 
+        /// <summary>
+        /// Get: Three bytes that uniquely identify the parameter set
+        /// </summary>
+        public byte[] OId
+        {
+            get { return _oId; }
+            private set { _oId = value; }
+        }
 
         /// <summary>
         /// The cipher Prng
@@ -132,28 +157,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         }
 
         /// <summary>
-        /// Get: Three bytes that uniquely identify the parameter set
-        /// </summary>
-        public byte[] OId
-        {
-            get { return _oId; }
-            private set { _oId = value; }
-        }
-
-        /// <summary>
         /// Return the error correction capability of the code
         /// </summary>
         public int T
         {
             get { return _T; }
-        }
-
-        /// <summary>
-        /// Returns the field polynomial
-        /// </summary>
-        public int FieldPolynomial
-        {
-            get { return _fieldPoly; }
         }
         #endregion
 
@@ -174,7 +182,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             this.RandomEngine = Prng;
         }
 
-
         /// <summary>
         /// Initialize this class
         /// </summary>
@@ -185,7 +192,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <param name="Digest">The digest used by the cipher engine</param>
         /// <param name="Prng">The Prng used by the cipher</param>
         /// 
-        /// <exception cref="CryptoAsymmetricException">Thrown if <c>keysize &lt; 1</c></exception>
+        /// <exception cref="CryptoAsymmetricException">Thrown if the OId is invalid, or <c>keysize &lt; 1</c></exception>
         public MPKCParameters(byte[] OId, int Keysize, CCA2Ciphers CCA2Engine = CCA2Ciphers.Fujisaki, Digests Digest = Digests.SHA256, Prngs Prng = Prngs.CTRPrng)
         {
             if (Keysize < 1)
@@ -224,7 +231,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <param name="Digest">The digest used by the cipher engine</param>
         /// <param name="Prng">The Prng used by the cipher</param>
         /// 
-        /// <exception cref="CryptoAsymmetricException">Thrown if; <c>m &lt; 1</c>, <c>m &gt; 32</c>, <c>t &lt; 0</c> or <c>t &gt; n</c></exception>
+        /// <exception cref="CryptoAsymmetricException">Thrown if the OId is invalid or; <c>m &lt; 1</c>, <c>m &gt; 32</c>, <c>t &lt; 0</c> or <c>t &gt; n</c></exception>
         public MPKCParameters(byte[] OId, int M, int T, CCA2Ciphers CCA2Engine = CCA2Ciphers.Fujisaki, Digests Digest = Digests.SHA256, Prngs Prng = Prngs.CTRPrng)
         {
             if (OId.Length != OID_SIZE)
@@ -265,7 +272,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <param name="Digest">The digest used by the cipher engine</param>
         /// <param name="Prng">The Prng used by the cipher</param>
         /// 
-        /// <exception cref="CryptoAsymmetricException">Thrown if; <c>t &lt; 0</c>, <c>t &gt; n</c>, or <c>poly</c> is not an irreducible field polynomial</exception>
+        /// <exception cref="CryptoAsymmetricException">Thrown if the OId is invalid or; <c>t &lt; 0</c>, <c>t &gt; n</c>, or <c>poly</c> is not an irreducible field polynomial</exception>
         public MPKCParameters(byte[] OId, int M, int T, int FieldPoly, CCA2Ciphers CCA2Engine = CCA2Ciphers.Fujisaki, Digests Digest = Digests.SHA256, Prngs Prng = Prngs.CTRPrng)
         {
             if (OId.Length != OID_SIZE)
@@ -298,10 +305,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         }
         
         /// <summary>
-        /// Reads a parameter set from an input stream
+        /// Builds a parameter set from an encoded input stream
         /// </summary>
         /// 
         /// <param name="ParamStream">Stream containing a parameter set</param>
+        /// 
+        /// <exception cref="CryptoAsymmetricException">Thrown if the Stream is unreadable</exception>
         public MPKCParameters(Stream ParamStream)
         {
             try
@@ -314,6 +323,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
                 _M = reader.ReadInt32();
                 _T = reader.ReadInt32();
                 _fieldPoly = reader.ReadInt32();
+                _N = 1 << M;
             }
             catch (Exception ex)
             {
@@ -322,7 +332,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         }
 
         /// <summary>
-        /// Reads a parameter set from a byte array
+        /// Builds a parameter set from an encoded byte array
         /// </summary>
         /// 
         /// <param name="ParamArray">Byte array containing a parameter set</param>
@@ -346,7 +356,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
 
         #region Public Methods
         /// <summary>
-        /// Read a Public key from a byte array.
+        /// Read an encoded Parameter set from a byte array
         /// </summary>
         /// 
         /// <param name="ParamArray">The byte array containing the parameters</param>
@@ -354,43 +364,37 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <returns>An initialized MPKCParameters class</returns>
         public static MPKCParameters From(byte[] ParamArray)
         {
-            return From(new MemoryStream(ParamArray));
+            return new MPKCParameters(ParamArray);
         }
 
         /// <summary>
-        /// Read a Parameters file from a byte array.
+        /// Read an encoded Parameters set from a Stream
         /// </summary>
         /// 
-        /// <param name="ParamStream">The byte array containing the params</param>
+        /// <param name="ParamStream">The Stream containing the encoded Parameter set</param>
         /// 
         /// <returns>An initialized MPKCParameters class</returns>
         public static MPKCParameters From(Stream ParamStream)
         {
-            try
-            {
-                BinaryReader reader = new BinaryReader(ParamStream);
-                byte[] oid = reader.ReadBytes(OID_SIZE);
-                CCA2Ciphers eng = (CCA2Ciphers)reader.ReadInt32();
-                Digests dgt = (Digests)reader.ReadInt32();
-                Prngs rnd = (Prngs)reader.ReadInt32();
-                int m = reader.ReadInt32();
-                int t = reader.ReadInt32();
-                int fp = reader.ReadInt32();
-
-                return new MPKCParameters(oid, m, t, fp, eng, dgt, rnd);
-            }
-            catch
-            {
-                throw;
-            }
+            return new MPKCParameters(ParamStream);
         }
 
         /// <summary>
-        /// Returns the current parameter set as an ordered byte array
+        /// Converts the current Parameter set to an encoded byte array
         /// </summary>
         /// 
         /// <returns>McElieceParameters as a byte array</returns>
         public byte[] ToBytes()
+        {
+            return ToStream().ToArray();
+        }
+
+        /// <summary>
+        /// Converts the current Parameter set to an encoded Stream
+        /// </summary>
+        /// 
+        /// <returns>McElieceParameters as a MemoryStream</returns>
+        public MemoryStream ToStream()
         {
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
             writer.Write(OId);
@@ -402,24 +406,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             writer.Write(FieldPolynomial);
             writer.Seek(0, SeekOrigin.Begin);
 
-            return ((MemoryStream)writer.BaseStream).ToArray();
+            return (MemoryStream)writer.BaseStream;
         }
 
         /// <summary>
-        /// Returns the current parameter set as a MemoryStream
+        /// Writes the MPKCParameters to a byte array
         /// </summary>
         /// 
-        /// <returns>McElieceParameters as a MemoryStream</returns>
-        public MemoryStream ToStream()
-        {
-            return new MemoryStream(ToBytes());
-        }
-
-        /// <summary>
-        /// Writes the parameter set to an output byte array
-        /// </summary>
-        /// 
-        /// <param name="Output">McElieceParameters as a byte array; can be initialized as zero bytes</param>
+        /// <param name="Output">Output array receiving the encoded Parameters</param>
         public void WriteTo(byte[] Output)
         {
             byte[] data = ToBytes();
@@ -428,13 +422,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         }
 
         /// <summary>
-        /// Writes the parameter set to an output byte array
+        /// Writes the MPKCParameters to a byte array
         /// </summary>
         /// 
-        /// <param name="Output">McElieceParameters as a byte array; array must be initialized and of sufficient length</param>
+        /// <param name="Output">Output array receiving the encoded Parameters</param>
         /// <param name="Offset">The starting position within the Output array</param>
         /// 
-        /// <exception cref="CryptoAsymmetricException">Thrown if the output array is too small</exception>
+        /// <exception cref="CryptoAsymmetricException">Thrown if The output array is too small</exception>
         public void WriteTo(byte[] Output, int Offset)
         {
             byte[] data = ToBytes();
@@ -445,10 +439,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         }
 
         /// <summary>
-        /// Writes the parameter set to an output stream
+        /// Writes the MPKCParameters to a Stream
         /// </summary>
         /// 
-        /// <param name="Output">Output stream</param>
+        /// <param name="Output">The Output stream receiving the encoded Parameters</param>
         public void WriteTo(Stream Output)
         {
             try
@@ -520,13 +514,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
 
         #region IClone
         /// <summary>
-        /// Create a copy of this McElieceParameters instance
+        /// Create a shallow copy of this McElieceParameters instance
         /// </summary>
         /// 
-        /// <returns>McElieceParameters copy</returns>
+        /// <returns>The McElieceParameters copy</returns>
         public object Clone()
         {
             return new MPKCParameters(_oId, M, T, FieldPolynomial, _cca2Engine, _dgtEngineType, _rndEngineType);
+        }
+
+        /// <summary>
+        /// Create a deep copy of this MPKCParameters instance
+        /// </summary>
+        /// 
+        /// <returns>The MPKCParameters copy</returns>
+        public object DeepCopy()
+        {
+            return new MPKCParameters(ToStream());
         }
         #endregion
 
@@ -555,6 +559,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
                     _M = 0;
                     _T = 0;
                     _fieldPoly = 0;
+                    _cca2Engine = CCA2Ciphers.Fujisaki;
+                    _dgtEngineType = Digests.SHA256;
+                    _rndEngineType = Prngs.CTRPrng;
                 }
                 finally
                 {

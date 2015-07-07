@@ -4,6 +4,7 @@ using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.Algebra;
 using VTDev.Libraries.CEXEngine.Exceptions;
+using System.Runtime.Serialization.Formatters.Binary;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
@@ -15,6 +16,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
     {
         #region Constants
         private const int GF_LENGTH = 4;
+        private const string ALG_NAME = "MPKCPrivateKey";
         #endregion
 
         #region Fields
@@ -29,6 +31,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Get: Private key name
+        /// </summary>
+        public string Name
+        {
+            get { return ALG_NAME; }
+        }
+
         /// <summary>
         /// Get: Returns the finite field <c>GF(2^m)</c>
         /// </summary>
@@ -142,7 +152,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
                 _qInv[i] = new PolynomialGF2mSmallM(_gField, QInv[i]);
         }
 
-        
         /// <summary>
         /// Reads a Private Key from a Stream
         /// </summary>
@@ -158,8 +167,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
                 BinaryReader reader = new BinaryReader(KeyStream);
 
                 // length
-                int _N = reader.ReadInt32();
-
+                _N = reader.ReadInt32();
                 // dimension
                 _K = reader.ReadInt32();
 
@@ -199,7 +207,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
                 for (int i = 0; i < QInv.Length; i++)
                     _qInv[i] = new PolynomialGF2mSmallM(_gField, qi[i]);
             }
-            catch (IOException ex)
+            catch (Exception ex)
             {
                 throw new CryptoAsymmetricException("MPKCPrivateKey:CTor", "The Private key could not be loaded!", ex);
             }
@@ -230,79 +238,53 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
 
         #region Public Methods
         /// <summary>
-        /// Read a Public key from a byte array.
-        /// <para>The array can contain only the public key.</para>
+        /// Read a Private key from a byte array
         /// </summary>
         /// 
-        /// <param name="KeyArray">The byte array containing the key</param>
+        /// <param name="KeyArray">The byte array containing the encoded key</param>
         /// 
-        /// <returns>An initialized MPKCPublicKey class</returns>
+        /// <returns>An initialized MPKCPrivateKey class</returns>
         public static MPKCPrivateKey From(byte[] KeyArray)
         {
-            return From(new MemoryStream(KeyArray));
+            return new MPKCPrivateKey(KeyArray);
         }
 
         /// <summary>
-        /// Read a Public key from a byte stream
+        /// Read a Private key from a stream
         /// </summary>
         /// 
-        /// <param name="KeyStream">The stream containing the key</param>
+        /// <param name="KeyStream">The stream containing the encoded key</param>
         /// 
-        /// <returns>An initialized MPKCPublicKey class</returns>
+        /// <returns>An initialized MPKCPrivateKey class</returns>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if the stream can not be read</exception>
         public static MPKCPrivateKey From(Stream KeyStream)
         {
-            try
-            {
-                int len;
-                BinaryReader reader = new BinaryReader(KeyStream);
-                // length
-                int n = reader.ReadInt32();
-                // dimension
-                int k = reader.ReadInt32();
-                // gf
-                byte[] gf = reader.ReadBytes(GF_LENGTH);
-                // gp
-                len = reader.ReadInt32();
-                byte[] gp = reader.ReadBytes(len);
-                // p1
-                len = reader.ReadInt32();
-                byte[] p1 = reader.ReadBytes(len);
-                // check matrix
-                len = reader.ReadInt32();
-                byte[] h = reader.ReadBytes(len);
-
-                // length of first dimension
-                len = reader.ReadInt32();
-                byte[][] qi = new byte[len][];
-                // get the qinv encoded array
-                for (int i = 0; i < qi.Length; i++)
-                {
-                    len = reader.ReadInt32();
-                    qi[i] = reader.ReadBytes(len);
-                }
-
-                return new MPKCPrivateKey(n, k, gf, gp, p1, h, qi);
-            }
-            catch (Exception ex)
-            {
-                throw new CryptoAsymmetricException("MPKCPrivateKey:Ctor", ex.Message, ex);
-            }
+            return new MPKCPrivateKey(KeyStream);
         }
 
         /// <summary>
-        /// Converts the key pair to a byte array
+        /// Converts the Private key to an encoded byte array
         /// </summary>
         /// 
-        /// <returns>The encoded key pair</returns>
+        /// <returns>The encoded MPKCPrivateKey</returns>
         public byte[] ToBytes()
+        {
+            return ToStream().ToArray();
+        }
+
+        /// <summary>
+        /// Converts the MPKCPrivateKey to an encoded MemoryStream
+        /// </summary>
+        /// 
+        /// <returns>The Private Key encoded as a MemoryStream</returns>
+        public MemoryStream ToStream()
         {
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
             // length
-            writer.Write(N);
+            writer.Write(_N);
             // dimension
-            writer.Write(K);
+            writer.Write(_K);
             // gf
             writer.Write(_gField.GetEncoded());
             // gp
@@ -328,25 +310,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
                 writer.Write(qi.Length);
                 writer.Write(qi);
             }
+            writer.BaseStream.Seek(0, SeekOrigin.Begin);
 
-            return ((MemoryStream)writer.BaseStream).ToArray();
+            return (MemoryStream)writer.BaseStream;
         }
 
         /// <summary>
-        /// Returns the current key pair set as a MemoryStream
+        /// Writes encoded the MPKCPrivateKey to an output byte array
         /// </summary>
         /// 
-        /// <returns>KeyPair as a MemoryStream</returns>
-        public MemoryStream ToStream()
-        {
-            return new MemoryStream(ToBytes());
-        }
-
-        /// <summary>
-        /// Writes the key pair to an output byte array
-        /// </summary>
-        /// 
-        /// <param name="Output">KeyPair as a byte array; can be initialized as zero bytes</param>
+        /// <param name="Output">The Private Key encoded as a byte array</param>
         public void WriteTo(byte[] Output)
         {
             byte[] data = ToBytes();
@@ -355,10 +328,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         }
 
         /// <summary>
-        /// Writes the key pair to an output byte array
+        /// Writes the encoded MPKCPrivateKey to an output byte array
         /// </summary>
         /// 
-        /// <param name="Output">KeyPair as a byte array; can be initialized as zero bytes</param>
+        /// <param name="Output">The Private Key encoded to a byte array</param>
         /// <param name="Offset">The starting position within the Output array</param>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if the output array is too small</exception>
@@ -372,12 +345,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         }
 
         /// <summary>
-        /// Writes the key pair to an output stream
+        /// Writes the encoded MPKCPrivateKey to an output stream
         /// </summary>
         /// 
-        /// <param name="Output">Output Stream</param>
+        /// <param name="Output">The Output Stream receiving the encoded Private Key</param>
         /// 
-        /// <exception cref="CryptoAsymmetricException">Thrown if an IO error is raised</exception>
+        /// <exception cref="CryptoAsymmetricException">Thrown if the key could not be written</exception>
         public void WriteTo(Stream Output)
         {
             try
@@ -385,9 +358,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
                 using (MemoryStream stream = ToStream())
                     stream.WriteTo(Output);
             }
-            catch (IOException ex)
+            catch (Exception ex)
             {
-                throw new CryptoAsymmetricException("MPKCPrivateKey:WriteTo", ex.Message, ex);
+                throw new CryptoAsymmetricException("MPKCPrivateKey:WriteTo", "The key could not be written!", ex);
             }
         }
         #endregion
@@ -451,13 +424,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
 
         #region IClone
         /// <summary>
-        /// Create a copy of this MPKCPublicKey instance
+        /// Create a shallow copy of this MPKCPublicKey instance
         /// </summary>
         /// 
-        /// <returns>MPKCPublicKey copy</returns>
+        /// <returns>The MPKCPublicKey copy</returns>
         public object Clone()
         {
             return new MPKCPrivateKey(_N, _K, _gField, _goppaPoly, _P1, _H, _qInv);
+        }
+
+        /// <summary>
+        /// Create a deep copy of this MPKCPublicKey instance
+        /// </summary>
+        /// 
+        /// <returns>The MPKCPublicKey copy</returns>
+        public object DeepCopy()
+        {
+            return new MPKCPrivateKey(ToStream());
         }
         #endregion
 

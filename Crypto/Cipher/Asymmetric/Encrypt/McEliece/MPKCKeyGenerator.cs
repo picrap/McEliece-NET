@@ -57,6 +57,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
     /// </remarks>
     public sealed class MPKCKeyGenerator : IAsymmetricGenerator
     {
+        #region Constants
+        private const string ALG_NAME = "MPKCKeyGenerator";
+        #endregion
+
         #region Fields
         private bool _isDisposed;
         private MPKCParameters _mpkcParams;
@@ -65,6 +69,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         private int _T;
         private int _fieldPoly;
         private IRandom _rndEngine;
+        #endregion
+
+        #region Properties
+        /// <summary>
+        /// Get: Generator name
+        /// </summary>
+        public string Name
+        {
+            get { return ALG_NAME; }
+        }
         #endregion
 
         #region Constructor

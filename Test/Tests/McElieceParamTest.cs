@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
+using Test;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece;
 
-namespace Test.Tests
+namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.McEliece
 {
     /// <summary>
     /// Test the validity of the McEliece Parameters implementation
@@ -33,7 +34,7 @@ namespace Test.Tests
 
         #region Public Methods
         /// <summary>
-        /// Tests the validity of the McEliece implementation
+        /// Tests the validity of the EncryptionKey implementation
         /// </summary>
         /// 
         /// <returns>State</returns>
@@ -57,7 +58,7 @@ namespace Test.Tests
         #region Private Methods
         private void TestParams()
         {
-            MPKCParameters mpar = MPKCParamSets.MPKCFM11T40S256;
+            MPKCParameters mpar = (MPKCParameters)MPKCParamSets.MPKCFM11T40S256.DeepCopy();
             byte[] enc = mpar.ToBytes();
 
             using (MPKCParameters mpar2 = MPKCParameters.From(enc))

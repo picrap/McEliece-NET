@@ -1,10 +1,11 @@
 ﻿using System;
 using System.IO;
+using Test;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
 using VTDev.Libraries.CEXEngine.Tools;
 
-namespace Test.Tests
+namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.McEliece
 {
     /// <summary>
     /// Test the validity of the EncryptionKey implementation
@@ -59,7 +60,7 @@ namespace Test.Tests
         #region Private Methods
         private void TestEncode()
         {
-            MPKCParameters mpar = MPKCParamSets.MPKCFM11T40S256;
+            MPKCParameters mpar = (MPKCParameters)MPKCParamSets.MPKCFM11T40S256.DeepCopy();
             MPKCKeyGenerator mkgen = new MPKCKeyGenerator(mpar);
             IAsymmetricKeyPair akp = mkgen.GenerateKeyPair();
 
@@ -83,7 +84,7 @@ namespace Test.Tests
 
             MPKCPrivateKey pri = (MPKCPrivateKey)akp.PrivateKey;
             enc = pri.ToBytes();
-            using (MPKCPrivateKey pri2 = MPKCPrivateKey.From(enc))
+            using (MPKCPrivateKey pri2 = new MPKCPrivateKey(enc))
             {
                 if (!pri.Equals(pri2))
                     throw new Exception("EncryptionKey: private key comparison test failed!");
@@ -101,7 +102,7 @@ namespace Test.Tests
 
             using (MPKCEncrypt mpe = new MPKCEncrypt(mpar))
             {
-                mpe.Initialize(true, akp);
+                mpe.Initialize(akp.PublicKey);
 
                 int sz = mpe.MaxPlainText - 1;
                 byte[] data = new byte[sz];
@@ -109,7 +110,7 @@ namespace Test.Tests
 
                 enc = mpe.Encrypt(data);
 
-                mpe.Initialize(false, akp);
+                mpe.Initialize(akp.PrivateKey);
                 byte[] dec = mpe.Decrypt(enc);
 
                 if (!Compare.AreEqual(dec, data))

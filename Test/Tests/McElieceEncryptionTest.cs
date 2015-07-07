@@ -1,10 +1,11 @@
 ﻿using System;
+using Test;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Tools;
 
-namespace Test.Tests
+namespace VTDev.Projects.CEX.Test.Tests.Asymmetric.McEliece
 {
     /// <summary>
     /// Test the validity of the CCA2 Encryption implementation
@@ -60,7 +61,7 @@ namespace Test.Tests
         #region Private Methods
         private void TestKey()
         {
-            MPKCParameters encParams = MPKCParamSets.MPKCFM11T40S256;
+            MPKCParameters encParams = (MPKCParameters)MPKCParamSets.MPKCFM11T40S256.DeepCopy();
             MPKCKeyGenerator keyGen = new MPKCKeyGenerator(encParams);
             IAsymmetricKeyPair keyPair = keyGen.GenerateKeyPair();
             byte[] enc, dec, data;
@@ -68,8 +69,8 @@ namespace Test.Tests
             // encrypt an array
             using (MPKCEncrypt cipher = new MPKCEncrypt(encParams))
             {
-                cipher.Initialize(true, new MPKCKeyPair(keyPair.PublicKey));
-                data = new byte[66];//cipher.MaxPlainText - 1
+                cipher.Initialize(keyPair.PublicKey);
+                data = new byte[66];
                 new CSPRng().GetBytes(data);
                 enc = cipher.Encrypt(data);
             }
@@ -77,7 +78,7 @@ namespace Test.Tests
             // decrypt the cipher text
             using (MPKCEncrypt cipher = new MPKCEncrypt(encParams))
             {
-                cipher.Initialize(false, new MPKCKeyPair(keyPair.PrivateKey));
+                cipher.Initialize(keyPair.PrivateKey);
                 dec = cipher.Decrypt(enc);
             }
 
@@ -88,7 +89,7 @@ namespace Test.Tests
 
         private void TestEncrypt()
         {
-            MPKCParameters mpar = MPKCParamSets.MPKCFM11T40S256;
+            MPKCParameters mpar = (MPKCParameters)MPKCParamSets.MPKCFM11T40S256.DeepCopy();
             MPKCKeyGenerator mkgen = new MPKCKeyGenerator(mpar);
             IAsymmetricKeyPair akp = mkgen.GenerateKeyPair();
             byte[] enc;
@@ -96,15 +97,15 @@ namespace Test.Tests
             // Fujisaki
             using (MPKCEncrypt mpe = new MPKCEncrypt(mpar))
             {
-                mpe.Initialize(true, akp);
+                mpe.Initialize(akp.PublicKey);
 
-                int sz = mpe.MaxPlainText;
+                int sz = mpe.MaxPlainText - 1;
                 byte[] data = new byte[sz];
                 new CSPRng().GetBytes(data);
 
                 enc = mpe.Encrypt(data);
 
-                mpe.Initialize(false, akp);
+                mpe.Initialize(akp.PrivateKey);
                 byte[] dec = mpe.Decrypt(enc);
 
                 if (!Compare.AreEqual(dec, data))
@@ -115,15 +116,16 @@ namespace Test.Tests
             // KobaraLmai
             using (MPKCEncrypt mpe = new MPKCEncrypt(mpar))
             {
-                mpe.Initialize(true, akp);
+                mpar = (MPKCParameters)MPKCParamSets.MPKCFM11T40S256.DeepCopy();
+                mpe.Initialize(akp.PublicKey);
 
-                int sz = mpe.MaxPlainText;
+                int sz = mpe.MaxPlainText - 1;
                 byte[] data = new byte[sz];
                 new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPRng().GetBytes(data);
 
                 enc = mpe.Encrypt(data);
 
-                mpe.Initialize(false, akp);
+                mpe.Initialize(akp.PrivateKey);
                 byte[] dec = mpe.Decrypt(enc);
 
                 if (!Compare.AreEqual(dec, data))
@@ -134,15 +136,16 @@ namespace Test.Tests
             // Pointcheval
             using (MPKCEncrypt mpe = new MPKCEncrypt(mpar))
             {
-                mpe.Initialize(true, akp);
+                mpar = (MPKCParameters)MPKCParamSets.MPKCFM11T40S256.DeepCopy();
+                mpe.Initialize(akp.PublicKey);
 
-                int sz = mpe.MaxPlainText;
+                int sz = mpe.MaxPlainText - 1;
                 byte[] data = new byte[sz];
                 new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPRng().GetBytes(data);
 
                 enc = mpe.Encrypt(data);
 
-                mpe.Initialize(false, akp);
+                mpe.Initialize(akp.PrivateKey);
                 byte[] dec = mpe.Decrypt(enc);
 
                 if (!Compare.AreEqual(dec, data))

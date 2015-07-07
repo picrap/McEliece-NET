@@ -29,14 +29,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
     /// // get the message code for an array of bytes
     /// using (MPKCSign sgn = new MPKCSign(ps))
     /// {
-    ///     sgn.Initialize(new MPKCKeyPair(kp.PublicKey));
+    ///     sgn.Initialize(kp.PublicKey);
     ///     code = sgn.Sign(data, 0, data.Length);
     /// }
     ///
     /// // test the message for validity
     /// using (MPKCSign sgn = new MPKCSign(ps))
     /// {
-    ///     sgn.Initialize(new MPKCKeyPair(kp.PrivateKey));
+    ///     sgn.Initialize(kp.PrivateKey);
     ///     bool valid = sgn.Verify(data, 0, data.Length, code);
     /// }
     /// </code>
@@ -62,17 +62,37 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
     /// <item><description>Digests can be any of the implemented digests; Blake, Keccak, SHA-2 or Skein.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class MPKCSign : IDisposable
+    public sealed class MPKCSign : IAsymmetricSign
     {
+        #region Constants
+        private const string ALG_NAME = "MPKCSign";
+        #endregion
+
         #region Fields
         private IMPKCCiphers _asyCipher;
         private IDigest _dgtEngine;
         private bool _isDisposed = false;
         private bool _isInitialized = false;
-        private IAsymmetricKeyPair _keyPair;
+        private IAsymmetricKey _asmKey;
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Get: This class is initialized for Signing with the Public key
+        /// </summary>
+        /// 
+        /// <exception cref="CryptoAsymmetricSignException">Thrown if cipher has not been initialized</exception>
+        public bool IsSigner
+        {
+            get
+            {
+                if (!_isInitialized)
+                    throw new CryptoAsymmetricSignException("MPKCSign:IsSigner", "The signer has not been initialized!", new InvalidOperationException());
+
+                return (_asmKey is MPKCPublicKey);
+            }
+        }
+
         /// <summary>
         /// Get: The maximum number of bytes the cipher can decrypt
         /// </summary>
@@ -85,11 +105,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
                 if (!_isInitialized)
                     throw new CryptoAsymmetricException("MPKCSign:MaxPlainText", "The signer has not been initialized!", new InvalidOperationException());
 
-                if (_keyPair.PublicKey != null)
-                    return ((MPKCPublicKey)_keyPair.PublicKey).K >> 3; 
+                if (_asmKey is MPKCPublicKey)
+                    return ((MPKCPublicKey)_asmKey).K >> 3; 
                 else
-                    return ((MPKCPrivateKey)_keyPair.PrivateKey).K >> 3; 
+                    return ((MPKCPrivateKey)_asmKey).K >> 3; 
             }
+        }
+
+        /// <summary>
+        /// Get: Cipher name
+        /// </summary>
+        public string Name
+        {
+            get { return ALG_NAME; }
         }
         #endregion
 
@@ -124,16 +152,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// Initialize the cipher
         /// </summary>
         /// 
-        /// <param name="KeyPair">The <see cref="IAsymmetricKeyPair"/> containing the McEliece public or private key</param>
+        /// <param name="AsmKey">The <see cref="IAsymmetricKey"/> containing the McEliece Public (Sign) or Private (Verify) key</param>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if an invalid keypair is used</exception>
-        public void Initialize(IAsymmetricKeyPair KeyPair)
+        public void Initialize(IAsymmetricKey AsmKey)
         {
-            if (!(KeyPair is MPKCKeyPair))
-                throw new CryptoAsymmetricException("MPKCSign:Initialize", "The key pair is not a valid McEliece key pair!", new InvalidDataException());
+            if (!(AsmKey is MPKCPublicKey) && !(AsmKey is MPKCPrivateKey))
+                throw new CryptoAsymmetricSignException("MPKCSign:Initialize", "The key is not a valid RNBW key!", new InvalidDataException());
 
             Reset();
-            _keyPair = KeyPair;
+            _asmKey = AsmKey;
             _isInitialized = true;
         }
 
@@ -158,12 +186,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         {
             if (!_isInitialized)
                 throw new CryptoAsymmetricException("MPKCSign:Sign", "The signer has not been initialized!", new InvalidOperationException());
-            if (_keyPair.PublicKey == null)
+            if (_asmKey == null)
                 throw new CryptoAsymmetricException("MPKCSign:Sign", "The public key is invalid!", new InvalidDataException());
-            if (!(_keyPair.PublicKey is MPKCPublicKey))
+            if (!(_asmKey is MPKCPublicKey))
                 throw new CryptoAsymmetricException("MPKCSign:Sign", "The public key is invalid!", new InvalidDataException());
 
-            _asyCipher.Initialize(true, _keyPair);
+            _asyCipher.Initialize(_asmKey);
 
             if (_asyCipher.MaxPlainText < _dgtEngine.DigestSize)
                 throw new CryptoAsymmetricException("MPKCSign:Sign", string.Format("The key size is too small; key supports encrypting up to {0} bytes!", _asyCipher.MaxPlainText), new ArgumentOutOfRangeException());
@@ -190,12 +218,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
                 throw new CryptoAsymmetricException("MPKCSign:Sign", "The input array is too short!", new ArgumentOutOfRangeException());
             if (!_isInitialized)
                 throw new CryptoAsymmetricException("MPKCSign:Sign", "The signer has not been initialized!", new InvalidOperationException());
-            if (_keyPair.PublicKey == null)
+            if (_asmKey == null)
                 throw new CryptoAsymmetricException("MPKCSign:Sign", "The public key is invalid!", new InvalidDataException());
-            if (!(_keyPair.PublicKey is MPKCPublicKey))
+            if (!(_asmKey is MPKCPublicKey))
                 throw new CryptoAsymmetricException("MPKCSign:Sign", "The public key is invalid!", new InvalidDataException());
 
-            _asyCipher.Initialize(true, _keyPair);
+            _asyCipher.Initialize(_asmKey);
 
             if (_asyCipher.MaxPlainText < _dgtEngine.DigestSize)
                 throw new CryptoAsymmetricException("MPKCSign:Sign", string.Format("The key size is too small; key supports encrypting up to {0} bytes!", _asyCipher.MaxPlainText), new ArgumentException());
@@ -219,12 +247,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         {
             if (!_isInitialized)
                 throw new CryptoAsymmetricException("MPKCSign:Verify", "The signer has not been initialized!", new InvalidOperationException());
-            if (_keyPair.PrivateKey == null)
+            if (_asmKey == null)
                 throw new CryptoAsymmetricException("MPKCSign:Verify", "The private key is invalid!", new InvalidDataException());
-            if (!(_keyPair.PrivateKey is MPKCPrivateKey))
+            if (!(_asmKey is MPKCPrivateKey))
                 throw new CryptoAsymmetricException("MPKCSign:Verify", "The private key is invalid!", new InvalidDataException());
 
-            _asyCipher.Initialize(false, _keyPair);
+            _asyCipher.Initialize(_asmKey);
             byte[] chksum = _asyCipher.Decrypt(Code);
             byte[] hash = Compute(InputStream);
 
@@ -249,12 +277,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
                 throw new CryptoAsymmetricException("MPKCSign:Verify", "The input array is too short!", new ArgumentOutOfRangeException());
             if (!_isInitialized)
                 throw new CryptoAsymmetricException("MPKCSign:Verify", "The signer has not been initialized!", new InvalidOperationException());
-            if (_keyPair.PrivateKey == null)
+            if (_asmKey == null)
                 throw new CryptoAsymmetricException("MPKCSign:Verify", "The private key is invalid!", new InvalidDataException());
-            if (!(_keyPair.PrivateKey is MPKCPrivateKey))
+            if (!(_asmKey is MPKCPrivateKey))
                 throw new CryptoAsymmetricException("MPKCSign:Verify", "The private key is invalid!", new InvalidDataException());
 
-            _asyCipher.Initialize(false, _keyPair);
+            _asyCipher.Initialize(_asmKey);
             byte[] chksum = _asyCipher.Decrypt(Code);
             byte[] hash = Compute(Input, Offset, Length);
 

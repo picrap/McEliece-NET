@@ -7,6 +7,8 @@ using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Generator;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Utility;
+using VTDev.Libraries.CEXEngine.Exceptions;
+using System.IO;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCCiphers
@@ -29,16 +31,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         #endregion
 
         #region Fields
-        private IAsymmetricKeyPair _keyPair;
-        private bool _isDisposed = false;
-        private bool _isEncryption = false;
-        private int _maxPlainText;
+        private IAsymmetricKey _asmKey;
+        private MPKCParameters _cprParams;
         private IDigest _dgtEngine;
-        private IRandom _secRnd;
+        private bool _isDisposed = false;
+        private bool _isEncryption;
+        private int _maxPlainText;
+        private IRandom _rndEngine;
         private int _K;
         private int _N;
         private int _T;
-        private MPKCParameters _cipherParams;
         #endregion
 
         #region Properties
@@ -59,7 +61,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         /// <param name="Paramaters">The cipher parameters</param>
         public FujisakiCipher(MPKCParameters Paramaters)
         {
-            _cipherParams = Paramaters;
+            _cprParams = Paramaters;
             _dgtEngine = GetDigest(Paramaters.Digest);
         }
 
@@ -82,6 +84,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         /// <returns>The plain text</returns>
         public byte[] Decrypt(byte[] Input)
         {
+            if (_isEncryption)
+                throw new CryptoAsymmetricSignException("FujisakiCipher:Decrypt", "The cipher is not initialized for decryption!", new ArgumentException());
+
             int c1Len = (_N + 7) >> 3;
             int c2Len = Input.Length - c1Len;
 
@@ -92,14 +97,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
 
             // decrypt c1 ...
             GF2Vector hrmVec = GF2Vector.OS2VP(_N, c1);
-            GF2Vector[] decC1 = CCA2Primitives.Decrypt((MPKCPrivateKey)_keyPair.PrivateKey, hrmVec);
+            GF2Vector[] decC1 = CCA2Primitives.Decrypt((MPKCPrivateKey)_asmKey, hrmVec);
             byte[] rBytes = decC1[0].GetEncoded();
             // ... and obtain error vector z
             GF2Vector z = decC1[1];
 
             byte[] mBytes;
             // get PRNG object..
-            using (KDF2Drbg sr0 = new KDF2Drbg(GetDigest(_cipherParams.Digest)))
+            using (KDF2Drbg sr0 = new KDF2Drbg(GetDigest(_cprParams.Digest)))
             {
                 // seed PRNG with r'
                 sr0.Initialize(rBytes);
@@ -122,7 +127,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
 
             // check that Conv(H(m||r)) = z
             if (!hrmVec.Equals(z))
-                throw new Exception("Bad Padding: invalid ciphertext!");
+                throw new CryptoAsymmetricSignException("FujisakiCipher:Decrypt", "Bad Padding: invalid ciphertext!", new InvalidDataException());
 
             // return plaintext m
             return mBytes;
@@ -137,8 +142,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         /// <returns>The cipher text</returns>
         public byte[] Encrypt(byte[] Input)
         {
+            if (!_isEncryption)
+                throw new CryptoAsymmetricSignException("FujisakiCipher:Encrypt", "The cipher is not initialized for encryption!", new ArgumentException());
+
             // generate random vector r of length k bits
-            GF2Vector r = new GF2Vector(_K, _secRnd);
+            GF2Vector r = new GF2Vector(_K, _rndEngine);
             // convert r to byte array
             byte[] rBytes = r.GetEncoded();
             // compute (r||input)
@@ -152,11 +160,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
             GF2Vector z = CCA2Conversions.Encode(_N, _T, hrm);
 
             // compute c1 = E(r, z)
-            byte[] c1 = CCA2Primitives.Encrypt((MPKCPublicKey)_keyPair.PublicKey, r, z).GetEncoded();
+            byte[] c1 = CCA2Primitives.Encrypt((MPKCPublicKey)_asmKey, r, z).GetEncoded();
             byte[] c2;
 
             // get PRNG object
-            using (KDF2Drbg sr0 = new KDF2Drbg(GetDigest(_cipherParams.Digest)))
+            using (KDF2Drbg sr0 = new KDF2Drbg(GetDigest(_cprParams.Digest)))
             {
                 // seed PRNG with r'
                 sr0.Initialize(rBytes);
@@ -178,14 +186,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         /// </summary>
         /// 
         /// <returns>The size of the key</returns>
-        public int GetKeySize(IAsymmetricKey Key)
+        public int GetKeySize(IAsymmetricKey AsmKey)
         {
-            if (Key is MPKCPublicKey)
-                return ((MPKCPublicKey)Key).N;
-            if (Key is MPKCPrivateKey)
-                return ((MPKCPrivateKey)Key).N;
+            if (AsmKey is MPKCPublicKey)
+                return ((MPKCPublicKey)AsmKey).N;
+            if (AsmKey is MPKCPrivateKey)
+                return ((MPKCPrivateKey)AsmKey).N;
 
-            throw new ArgumentException("unsupported type");
+            throw new CryptoAsymmetricSignException("FujisakiCipher:Encrypt", "Unsupported Key type!", new ArgumentException());
         }
 
         /// <summary>
@@ -193,26 +201,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         /// <para>Requires a <see cref="MPKCPublicKey"/> for encryption, or a <see cref="MPKCPrivateKey"/> for decryption</para>
         /// </summary>
         /// 
-        /// <param name="Encryption">When true cipher is for encryption, if false, decryption</param>
-        /// <param name="KeyPair">The <see cref="IAsymmetricKeyPair"/> containing the McEliece public or private key</param>
-        public void Initialize(bool Encryption, IAsymmetricKeyPair KeyPair)
+        /// <param name="AsmKey">The <see cref="IAsymmetricKey"/> containing the McEliece public or private key</param>
+        public void Initialize(IAsymmetricKey AsmKey)
         {
-            _isEncryption = Encryption;
-            _keyPair = KeyPair;
+            if (!(AsmKey is MPKCPublicKey) && !(AsmKey is MPKCPrivateKey))
+                throw new CryptoAsymmetricSignException("FujisakiCipher:Initialize", "The key is not a valid McEliece key!", new InvalidDataException());
+
+            _isEncryption = (AsmKey is MPKCPublicKey);
+
+            _asmKey = AsmKey;
 
             if (_isEncryption)
             {
-                _secRnd = GetPrng(_cipherParams.RandomEngine);
-                _N = ((MPKCPublicKey)KeyPair.PublicKey).N;
-                _K = ((MPKCPublicKey)KeyPair.PublicKey).K;
-                _T = ((MPKCPublicKey)KeyPair.PublicKey).T;
-                _maxPlainText = (((MPKCPublicKey)KeyPair.PublicKey).K >> 3);
+                _rndEngine = GetPrng(_cprParams.RandomEngine);
+                _N = ((MPKCPublicKey)AsmKey).N;
+                _K = ((MPKCPublicKey)AsmKey).K;
+                _T = ((MPKCPublicKey)AsmKey).T;
+                _maxPlainText = (((MPKCPublicKey)AsmKey).K >> 3);
             }
             else
             {
-                _N = ((MPKCPrivateKey)KeyPair.PrivateKey).N;
-                _K = ((MPKCPrivateKey)KeyPair.PrivateKey).K;
-                _T = ((MPKCPrivateKey)KeyPair.PrivateKey).T;
+                _N = ((MPKCPrivateKey)AsmKey).N;
+                _K = ((MPKCPrivateKey)AsmKey).K;
+                _T = ((MPKCPrivateKey)AsmKey).T;
             }
         }
         #endregion
@@ -250,7 +261,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
                 case Digests.Skein1024:
                     return new Skein1024();
                 default:
-                    throw new ArgumentException("The digest type is not supported!");
+                    throw new CryptoAsymmetricSignException("FujisakiCipher:GetDigest", "The digest type is not supported!", new ArgumentException());
             }
         }
 
@@ -282,7 +293,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
                 case Prngs.QCG2:
                     return new QCG2();
                 default:
-                    throw new ArgumentException("The Prng type is not supported!");
+                    throw new CryptoAsymmetricSignException("FujisakiCipher:GetPrng", "The Prng type is not supported!", new ArgumentException());
             }
         }
         #endregion
@@ -308,10 +319,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
                         _dgtEngine.Dispose();
                         _dgtEngine = null;
                     }
-                    if (_secRnd != null)
+                    if (_rndEngine != null)
                     {
-                        _secRnd.Dispose();
-                        _secRnd = null;
+                        _rndEngine.Dispose();
+                        _rndEngine = null;
                     }
                     _K = 0;
                     _N = 0;
