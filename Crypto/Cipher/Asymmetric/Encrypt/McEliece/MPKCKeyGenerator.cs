@@ -6,6 +6,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Exceptions;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
@@ -86,16 +87,47 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// Initialize this class
         /// </summary>
         /// 
-        /// <param name="CiphersParams">The MPKCParameters instance containing thecipher settings</param>
-        public MPKCKeyGenerator(MPKCParameters CiphersParams)
+        /// <param name="CipherParams">The MPKCParameters instance containing thecipher settings</param>
+        /// <param name="Parallel">Use parallel processing when generating a key; set to false if using a passphrase type generator (default is true)</param>
+        /// 
+        /// <exception cref="CryptoAsymmetricException">Thrown if a Prng that requires pre-initialization is specified; (wrong constructor)</exception>
+        public MPKCKeyGenerator(MPKCParameters CipherParams, bool Parallel = true)
         {
-            _mpkcParams = (MPKCParameters)CiphersParams;
+            if (CipherParams.RandomEngine == Prngs.PBPrng)
+                throw new CryptoAsymmetricException("MPKCKeyGenerator:Ctor", "Passphrase based digest and CTR generators must be pre-initialized, use the other constructor!", new ArgumentException());
+
+            ParallelUtils.ForceLinear = !Parallel;
+            _mpkcParams = (MPKCParameters)CipherParams;
             // set source of randomness
             _rndEngine = GetPrng(_mpkcParams.RandomEngine);
             _M = _mpkcParams.M;
             _N = _mpkcParams.N;
             _T = _mpkcParams.T;
             _fieldPoly = _mpkcParams.FieldPolynomial;
+        }
+
+        /// <summary>
+        /// Use an initialized prng to generate the key; use this constructor with an Rng that requires pre-initialization, i.e. PBPrng
+        /// </summary>
+        /// 
+        /// <param name="CipherParams">The RLWEParameters instance containing the cipher settings</param>
+        /// <param name="RngEngine">An initialized Prng instance</param>
+        /// <param name="Parallel">Use parallel processing when generating a key; set to false if using a passphrase type generator (default is true)</param>
+        public MPKCKeyGenerator(MPKCParameters CipherParams, IRandom RngEngine, bool Parallel = true)
+        {
+            _mpkcParams = (MPKCParameters)CipherParams;
+            // set source of randomness
+            _rndEngine = RngEngine;
+            _M = _mpkcParams.M;
+            _N = _mpkcParams.N;
+            _T = _mpkcParams.T;
+            _fieldPoly = _mpkcParams.FieldPolynomial;
+
+            // passphrase gens must be linear processed
+            if (RngEngine.GetType().Equals(typeof(PBPRng)))
+                ParallelUtils.ForceLinear = true;
+            else
+                ParallelUtils.ForceLinear = !Parallel;
         }
 
         private MPKCKeyGenerator()
@@ -241,6 +273,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public void Dispose()
         {
+            ParallelUtils.ForceLinear = false;
             Dispose(true);
             GC.SuppressFinalize(this);
         }

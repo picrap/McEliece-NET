@@ -69,11 +69,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         #endregion
 
         #region Fields
+        private IAsymmetricKey _asmKey;
         private IMPKCCiphers _asyCipher;
         private IDigest _dgtEngine;
         private bool _isDisposed = false;
         private bool _isInitialized = false;
-        private IAsymmetricKey _asmKey;
         #endregion
 
         #region Properties
