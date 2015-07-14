@@ -28,7 +28,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
     /// <revision date="2015/01/23" version="1.4.0.0">Initial release</revision>
     /// </revisionHistory>
     /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.CCA2Ciphers">VTDev.Libraries.CEXEngine.Crypto McElieceCiphers Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.AsymmetricEngines">VTDev.Libraries.CEXEngine.Crypto AsymmetricEngines Enumeration</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCPublicKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece MPKCPublicKey Class</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCPrivateKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece MPKCPrivateKey Class</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKeyPair">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces IAsymmetricKeyPair Interface</seealso>
@@ -70,6 +70,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         private int _T;
         private int _fieldPoly;
         private IRandom _rndEngine;
+        private bool _frcLinear = false;
         #endregion
 
         #region Properties
@@ -96,6 +97,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             if (CipherParams.RandomEngine == Prngs.PBPrng)
                 throw new CryptoAsymmetricException("MPKCKeyGenerator:Ctor", "Passphrase based digest and CTR generators must be pre-initialized, use the other constructor!", new ArgumentException());
 
+            _frcLinear = ParallelUtils.ForceLinear;
             ParallelUtils.ForceLinear = !Parallel;
             _mpkcParams = (MPKCParameters)CipherParams;
             // set source of randomness
@@ -123,6 +125,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             _T = _mpkcParams.T;
             _fieldPoly = _mpkcParams.FieldPolynomial;
 
+            _frcLinear = ParallelUtils.ForceLinear;
             // passphrase gens must be linear processed
             if (RngEngine.GetType().Equals(typeof(PBPRng)))
                 ParallelUtils.ForceLinear = true;
@@ -273,7 +276,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         public void Dispose()
         {
-            ParallelUtils.ForceLinear = false;
+            ParallelUtils.ForceLinear = _frcLinear;
             Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -284,11 +287,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
             {
                 try
                 {
-                    if (_mpkcParams != null)
-                    {
-                        _mpkcParams.Dispose();
-                        _mpkcParams = null;
-                    }
                     if (_rndEngine != null)
                     {
                         _rndEngine.Dispose();

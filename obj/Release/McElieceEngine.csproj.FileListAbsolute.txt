@@ -4,6 +4,5 @@ C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\McEliece Sharp\
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\McEliece Sharp\obj\Release\McElieceEngine.pdb
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\McEliece\bin\Release\McElieceEngine.dll
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\McEliece\bin\Release\McElieceEngine.pdb
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\McEliece\obj\Release\McElieceEngine.csprojResolveAssemblyReference.cache
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\McEliece\obj\Release\McElieceEngine.dll
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\McEliece\obj\Release\McElieceEngine.pdb

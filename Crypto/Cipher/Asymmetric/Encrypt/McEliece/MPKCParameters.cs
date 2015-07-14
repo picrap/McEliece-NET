@@ -131,7 +131,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         }
 
         /// <summary>
-        /// Returns the length of the code
+        /// Returns the length of the code _maxPlainText = (((MPKCPublicKey)AsmKey).K >> 3);
         /// </summary>
         public int N
         {

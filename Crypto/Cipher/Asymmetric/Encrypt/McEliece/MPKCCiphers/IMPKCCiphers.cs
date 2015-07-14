@@ -19,7 +19,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MP
         /// Initialize the cipher
         /// </summary>
         /// 
-        /// <param name="KeyPair">The public or private key</param>
+        /// <param name="AsmKey">The public or private key</param>
         void Initialize(IAsymmetricKey AsmKey);
 
         /// <summary>

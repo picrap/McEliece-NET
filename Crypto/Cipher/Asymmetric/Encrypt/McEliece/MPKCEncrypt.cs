@@ -43,7 +43,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
     /// <revision date="2015/01/23" version="1.4.0.0">Initial release</revision>
     /// </revisionHistory>
     /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.CCA2Ciphers">VTDev.Libraries.CEXEngine.Crypto.Enumeration McElieceCiphers Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.AsymmetricEngines">VTDev.Libraries.CEXEngine.Crypto.Enumeration AsymmetricEngines Enumeration</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCPublicKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece MPKCPublicKey Class</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCPrivateKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece MPKCPrivateKey Class</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKeyPair">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces IAsymmetricKeyPair Interface</seealso>
@@ -89,7 +89,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
 
         #region Properties
         /// <summary>
-        /// Get: The maximum number of bytes the cipher can encrypt
+        /// Get: The cipher is initialized for encryption
+        /// </summary>
+        public bool IsEncryption
+        {
+            get 
+            {
+                if (!_isInitialized)
+                    throw new CryptoAsymmetricException("MPKCEncrypt:IsEncryption", "The cipher must be initialized before state can be determined!", new InvalidOperationException());
+
+                return _isEncryption; 
+            }
+        }
+
+        /// <summary>
+        /// Get: The cipher has been initialized with a key
+        /// </summary>
+        public bool IsInitialized
+        {
+            get { return _isInitialized; }
+        }
+
+        /// <summary>
+        /// Get: The maximum number of bytes the cipher can decrypt
         /// </summary>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if the cipher is not initialized</exception>
@@ -105,7 +127,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         }
 
         /// <summary>
-        /// Get: The maximum number of bytes the cipher can decrypt
+        /// Get: The maximum number of bytes the cipher can encrypt
         /// </summary>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if the cipher is not initialized</exception>

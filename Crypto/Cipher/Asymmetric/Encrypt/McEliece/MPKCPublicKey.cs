@@ -88,10 +88,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// Constructor used by McElieceKeyFactory
         /// </summary>
         /// 
-        /// <param name="T">The error correction capability of the code</param>
         /// <param name="N">The length of the code</param>
+        /// <param name="T">The error correction capability of the code</param>
         /// <param name="G">The encoded generator matrix</param>
-        public MPKCPublicKey(int T, int N, byte[] G)
+        public MPKCPublicKey(int N, int T, byte[] G)
         {
             _N = N;
             _T = T;
@@ -125,8 +125,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// </summary>
         /// 
         /// <param name="KeyArray">The encoded key array</param>
-        public MPKCPublicKey(byte[] Key) :
-            this(new MemoryStream(Key))
+        public MPKCPublicKey(byte[] KeyArray) :
+            this(new MemoryStream(KeyArray))
         {
         }
 
@@ -294,7 +294,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// <returns>The MPKCPublicKey copy</returns>
         public object Clone()
         {
-            return new MPKCPublicKey(_T, _N, _G);
+            return new MPKCPublicKey(_N, _T, _G);
         }
 
         /// <summary>

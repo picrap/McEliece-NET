@@ -18,7 +18,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
     /// <item><description>A Parameter Set OId (uniquely identifies the parameter set), is always the first four bytes of a serialized parameter set.</description></item>
     /// <item><description>The OId format is ordered as: <c>Family</c>, <c>Set</c>, <c>SubSet</c>, and <c>Unique</c>.</description></item>
     /// <item><description>A McEliece parameters Family designator (first byte) is always the value <c>1</c>, and corresponds to its entry in the <see cref="AsymmetricEngines"/> enumeration.</description></item>
-    /// <item><description>The second byte (Set), defines the CCA2 Secure variant type, and corresponds to the <see cref="CCA2Ciphers"/> enumeration.</para>
+    /// <item><description>The second byte (Set), defines the CCA2 Secure variant type, and corresponds to the <see cref="CCA2Ciphers"/> enumeration.</description></item>
     /// <item><description>The third byte indicates the M-base, 11, 12, 13, or 14.</description></item>
     /// <item><description>The fourth byte can be a unique designator.</description></item>
     /// </list>

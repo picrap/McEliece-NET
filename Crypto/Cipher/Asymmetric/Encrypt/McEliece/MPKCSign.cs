@@ -46,7 +46,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
     /// <revision date="2015/01/23" version="1.4.0.0">Initial release</revision>
     /// </revisionHistory>
     /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.CCA2Ciphers">VTDev.Libraries.CEXEngine.Crypto McElieceCiphers Enumeration</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.AsymmetricEngines">VTDev.Libraries.CEXEngine.Crypto AsymmetricEngines Enumeration</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCPublicKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece MPKCPublicKey Class</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece.MPKCPrivateKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece MPKCPrivateKey Class</seealso>
     /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKeyPair">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces IAsymmetricKeyPair Interface</seealso>
@@ -77,6 +77,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Get: The cipher has been initialized with a key
+        /// </summary>
+        public bool IsInitialized
+        {
+            get { return _isInitialized; }
+        }
+
         /// <summary>
         /// Get: This class is initialized for Signing with the Public key
         /// </summary>
@@ -177,7 +185,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// Get the signing code for a stream
         /// </summary>
         /// 
-        /// <param name="InputStream">The stream contining the data</param>
+        /// <param name="InputStream">The stream containing the data</param>
         /// 
         /// <returns>The encrypted hash code</returns>
         /// 
@@ -377,7 +385,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.McEliece
         /// 
         /// <returns>Instance of digest</returns>
         /// 
-        /// <exception cref="CryptoAsymmetricException">Thrown if the digest is unrecognized or unsupported</c></exception>
+        /// <exception cref="CryptoAsymmetricException">Thrown if the digest is unrecognized or unsupported</exception>
         private IDigest GetDigest(Digests Engine)
         {
             switch (Engine)
