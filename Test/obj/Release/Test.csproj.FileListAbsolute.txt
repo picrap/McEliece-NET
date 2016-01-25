@@ -19,3 +19,5 @@ C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\McEliece\Test\b
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\McEliece\Test\obj\Release\Test.csprojResolveAssemblyReference.cache
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\McEliece\Test\obj\Release\Test.exe
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\McEliece\Test\obj\Release\Test.pdb
+C:\Users\John\Documents\GitHub\McEliece-Sharp\McEliece-Sharp\Test\obj\Release\Test.exe
+C:\Users\John\Documents\GitHub\McEliece-Sharp\McEliece-Sharp\Test\obj\Release\Test.pdb
