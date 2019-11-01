@@ -228,7 +228,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
             {
                 if (ParallelUtils.IsParallel)
                 {
-                    Parallel.For(0, Source.Length, i =>
+                    Parallel.For(0l, Source.Length, i =>
                     {
                         int index = rnd.NextInt32(0, Source.Length - 1);
                         T temp = Source[i];
@@ -261,7 +261,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         {
             if (ParallelUtils.IsParallel)
             {
-                Parallel.For(0, Source.Length, i =>
+                Parallel.For(0l, Source.Length, i =>
                 {
                     int index = Rng.Next(0, Source.Length - 1);
                     T temp = Source[i];
