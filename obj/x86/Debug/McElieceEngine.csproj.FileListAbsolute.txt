@@ -1,6 +1,0 @@
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\McEliece Sharp\bin\x86\Debug\McElieceEngine.dll
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\McEliece Sharp\bin\x86\Debug\McElieceEngine.pdb
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\McEliece Sharp\obj\x86\Debug\McElieceEngine.dll
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\McEliece Sharp\obj\x86\Debug\McElieceEngine.pdb
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\McEliece Sharp\obj\x86\Debug\McElieceEngine.csprojResolveAssemblyReference.cache
-C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\McEliece Sharp\bin\x86\Debug\McElieceEngine.XML
